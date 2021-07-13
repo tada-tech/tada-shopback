@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
+    <system>
+        <tab id="shopback_integration" translate="label" sortOrder="100">
+            <label>Shopback Integration</label>
+        </tab>
+        <section id="shopback" translate="label" type="text" sortOrder="1000" showInDefault="1"
+                 showInWebsite="0"
+                 showInStore="0">
+            <class>separator-top</class>
+            <label>General</label>
+            <tab>shopback_integration</tab>
+            <resource>Tada_Shopback::configuration</resource>
+            <group id="general" translate="label" type="text" sortOrder="1000" showInDefault="1"
+                   showInWebsite="0"
+                   showInStore="0"><label>General Settings</label>
+                <field id="cookie_timelife" translate="label comment" type="text" sortOrder="10" showInDefault="1"
+                       showInWebsite="0" showInStore="0">
+                    <label>Cookie timelife</label>
+                    <comment>Unit: second. Example: 86400 = (1day), 1800 = (30 minutes), ...</comment>
+                </field>
+            </group>
+        </section>
+    </system>
+</config>
+
+
