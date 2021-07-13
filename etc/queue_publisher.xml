@@ -9,4 +9,7 @@
     <publisher topic="shopback.create_order">
         <connection name="db" exchange="magento-db" />
     </publisher>
+    <publisher topic="shopback.validate_order">
+        <connection name="db" exchange="magento-db" />
+    </publisher>
 </config>

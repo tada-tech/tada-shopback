@@ -12,4 +12,11 @@
               maxMessages="10000"
               consumerInstance="Magento\Framework\MessageQueue\Consumer"
               handler="Tada\Shopback\Model\ShopbackCreateOrder\Consumer::process" />
+
+    <consumer name="shopbackValidateOrder"
+              queue="shop_back_validate_order"
+              connection="db"
+              maxMessages="10000"
+              consumerInstance="Magento\Framework\MessageQueue\Consumer"
+              handler="Tada\Shopback\Model\ShopbackValidateOrder\Consumer::process" />
 </config>

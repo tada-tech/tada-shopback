@@ -11,5 +11,10 @@
                  topic="shopback.create_order"
                  destinationType="queue"
                  destination="shop_back_create_order"/>
+
+        <binding id="shopbackValidateOrderBinding"
+                 topic="shopback.validate_order"
+                 destinationType="queue"
+                 destination="shop_back_validate_order"/>
     </exchange>
 </config>

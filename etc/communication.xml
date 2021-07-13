@@ -9,4 +9,7 @@
     <topic name="shopback.create_order" request="Tada\CashbackTracking\Api\Data\CashbackTrackingInterface">
         <handler name="shopbackCreateOrder" type="Tada\Shopback\Model\ShopbackCreateOrder\Consumer" method="process" />
     </topic>
+    <topic name="shopback.validate_order" request="Magento\Sales\Api\Data\OrderInterface">
+        <handler name="shopbackValidateOrder" type="Tada\Shopback\Model\ShopbackValidateOrder\Consumer" method="process" />
+    </topic>
 </config>

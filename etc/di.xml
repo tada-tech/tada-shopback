@@ -6,4 +6,8 @@
 
     <preference for="Tada\Shopback\Api\ShopbackValidateOrderInterface"
                 type="Tada\Shopback\Model\ShopbackValidateOrderService" />
+    <type name="Magento\Sales\Model\ResourceModel\Order">
+        <plugin name="validateShopbackOrder"
+                type="Tada\Shopback\Model\ResourceModel\Order\Plugin\ShopbackValidateTrigger" />
+    </type>
 </config>

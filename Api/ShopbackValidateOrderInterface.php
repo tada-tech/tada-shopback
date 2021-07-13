@@ -2,12 +2,12 @@
 declare(strict_types=1);
 namespace Tada\Shopback\Api;
 
-use Tada\CashbackTracking\Api\Data\CashbackTrackingInterface as OrderPartnerTrackingInterface;
+use Magento\Sales\Api\Data\OrderInterface;
 
 interface ShopbackValidateOrderInterface
 {
     /**
-     * @param OrderPartnerTrackingInterface $orderPartnerTracking
+     * @param OrderInterface $order
      */
-    public function execute(OrderPartnerTrackingInterface $orderPartnerTracking):void;
+    public function execute(OrderInterface $order):void;
 }

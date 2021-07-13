@@ -8,9 +8,9 @@ use Magento\Framework\Event\ObserverInterface;
 use Magento\Framework\MessageQueue\PublisherInterface;
 use Psr\Log\LoggerInterface;
 
-class AfterCashbackTrackingSaveObserver implements ObserverInterface
+class ShopbackValidateOrderObserver implements ObserverInterface
 {
-    const TOPIC_NAME = "shopback.create_order";
+    const TOPIC_NAME = "shopback.validate_order";
 
     /**
      * @var PublisherInterface
@@ -18,12 +18,12 @@ class AfterCashbackTrackingSaveObserver implements ObserverInterface
     protected $publisher;
 
     /**
-     * @var LoggerInterfac
+     * @var LoggerInterface
      */
     protected $logger;
 
     /**
-     * AfterCashbackTrackingSaveObserver constructor.
+     * ShopbackValidateOrderObserver constructor.
      * @param PublisherInterface $publisher
      * @param LoggerInterface $logger
      */
@@ -40,9 +40,9 @@ class AfterCashbackTrackingSaveObserver implements ObserverInterface
      */
     public function execute(Observer $observer)
     {
-        $cashbackTracking = $observer->getData('data_object');
+        $order = $observer->getData('order');
         try {
-            $this->publisher->publish(self::TOPIC_NAME, $cashbackTracking);
+            $this->publisher->publish(self::TOPIC_NAME, $order);
         } catch (\Exception $e) {
             $this->logger->error($e);
         }

@@ -10,4 +10,8 @@
         <observer name="cashback_tracking_after_save_observer"
                   instance="Tada\Shopback\Observer\AfterCashbackTrackingSaveObserver" />
     </event>
+    <event name="order_call_shopback_validate_request">
+        <observer name="shopback_validate_order_observer"
+                  instance="Tada\Shopback\Observer\ShopbackValidateOrderObserver" />
+    </event>
 </config>
