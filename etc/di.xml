@@ -6,6 +6,13 @@
 
     <preference for="Tada\Shopback\Api\ShopbackValidateOrderInterface"
                 type="Tada\Shopback\Model\ShopbackValidateOrderService" />
+
+    <preference for="Tada\Shopback\Api\FakeShopbackRepositoryInterface"
+                type="Tada\Shopback\Model\FakeShopbackRepository" />
+
+    <preference for="Tada\Shopback\Api\Data\FakeShopbackResponseInterface"
+                type="Tada\Shopback\Model\Data\FakeShopbackResponse" />
+
     <type name="Magento\Sales\Model\ResourceModel\Order">
         <plugin name="validateShopbackOrder"
                 type="Tada\Shopback\Model\ResourceModel\Order\Plugin\ShopbackValidateTrigger" />

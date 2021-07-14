@@ -34,6 +34,12 @@ class ShopbackValidateTrigger
         $this->eventManager = $eventManager;
     }
 
+    /**
+     * @param ResourceOrder $subject
+     * @param ResourceOrder $result
+     * @param \Magento\Framework\Model\AbstractModel $orderModel
+     * @return ResourceOrder
+     */
     public function afterSave(
         ResourceOrder $subject,
         ResourceOrder $result,
@@ -45,7 +51,7 @@ class ShopbackValidateTrigger
             return $result;
         }
 
-        if (!$order->getExtensionAttributes()->getPartnerTracking()) {
+        if (!$orderPartnerTracking = $order->getExtensionAttributes()->getPartnerTracking()) {
             return $result;
         }
 
@@ -53,7 +59,10 @@ class ShopbackValidateTrigger
         $newState = $orderModel->getData('state');
 
         if ($oldState != $newState && in_array($newState, self::ALLOW_STATE_TO_TRIGGER)) {
-            $this->eventManager->dispatch('order_call_shopback_validate_request', ['order' => $order]);
+            $this->eventManager->dispatch(
+                'order_call_shopback_validate_request',
+                ['order_partner_tracking' => $orderPartnerTracking]
+            );
         }
 
         return $result;

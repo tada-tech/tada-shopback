@@ -40,9 +40,9 @@ class ShopbackValidateOrderObserver implements ObserverInterface
      */
     public function execute(Observer $observer)
     {
-        $order = $observer->getData('order');
+        $orderPartnerTracking = $observer->getData('order_partner_tracking');
         try {
-            $this->publisher->publish(self::TOPIC_NAME, $order);
+            $this->publisher->publish(self::TOPIC_NAME, $orderPartnerTracking);
         } catch (\Exception $e) {
             $this->logger->error($e);
         }
