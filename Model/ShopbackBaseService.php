@@ -76,7 +76,7 @@ abstract class ShopbackBaseService
      * @return string
      * @throws \Exception
      */
-    protected function formatDateTime(
+    public function formatDateTime(
         string $dateTime,
         string $timeZone = self::BANGKOK_TIME_ZONE,
         string $format = "Y-m-d H:i:s"
