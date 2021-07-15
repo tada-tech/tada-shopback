@@ -5,7 +5,6 @@ namespace Tada\Shopback\Test\Unit;
 
 use GuzzleHttp\ClientFactory;
 use GuzzleHttp\Psr7\ResponseFactory;
-use Magento\Setup\Model\ThemeDependencyCheckerFactory;
 use PHPUnit\Framework\TestCase;
 use Mockery;
 use Tada\Shopback\Model\ShopbackBaseService;
