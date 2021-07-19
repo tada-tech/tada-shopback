@@ -9,7 +9,7 @@ use Magento\Sales\Api\OrderRepositoryInterface;
 use Magento\Sales\Model\ResourceModel\Order as ResourceOrder;
 use PHPUnit\Framework\TestCase;
 use Mockery;
-use Tada\Shopback\Model\ResourceModel\Order\Plugin\ShopbackValidateTrigger;
+use Tada\Shopback\Plugin\Order\ShopbackValidateTrigger;
 use Tada\CashbackTracking\Api\Data\CashbackTrackingInterface;
 use Magento\Sales\Model\Order;
 

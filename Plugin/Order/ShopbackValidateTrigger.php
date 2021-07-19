@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Tada\Shopback\Model\ResourceModel\Order\Plugin;
+namespace Tada\Shopback\Plugin\Order;
 
 use Magento\Sales\Model\ResourceModel\Order as ResourceOrder;
 use Magento\Sales\Model\Order;
