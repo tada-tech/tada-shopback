@@ -5,6 +5,18 @@
         <shopback>
             <general>
                 <cookie_timelife>86400</cookie_timelife>
+                <shopback_status_mapping>
+                    {
+                    "_1626752833404_404":{
+                    "order_status":"complete",
+                    "shopback_status":"approved"
+                    },
+                    "_1626752903277_277":{
+                    "order_status":"canceled",
+                    "shopback_status":"rejected"
+                    }
+                    }
+                </shopback_status_mapping>
             </general>
         </shopback>
     </default>

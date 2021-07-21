@@ -8,8 +8,11 @@ use Mockery;
 use Magento\Framework\Event\Observer;
 use Magento\Framework\MessageQueue\PublisherInterface;
 use Psr\Log\LoggerInterface;
+use Tada\CashbackTracking\Api\CashbackTrackingRepositoryInterface;
+use Tada\CashbackTracking\Api\Data\CashbackTrackingExtensionFactory;
 use Tada\CashbackTracking\Model\CashbackTracking;
 use Tada\Shopback\Observer\AfterCashbackTrackingSaveObserver;
+use Tada\CashbackTracking\Api\Data\CashbackTrackingExtensionInterface;
 
 class AfterCashbackTrackingSaveObserverTest extends TestCase
 {
@@ -28,11 +31,19 @@ class AfterCashbackTrackingSaveObserverTest extends TestCase
      */
     protected $afterCashbackTrackingSaveObserver;
 
+    protected $cashbackTrackingRepository;
+
+    protected $cashbackExtensionFactory;
+
     protected function setUp()
     {
         $this->logger = Mockery::mock(LoggerInterface::class);
         $this->publisher = Mockery::mock(PublisherInterface::class);
+        $this->cashbackTrackingRepository = Mockery::mock(CashbackTrackingRepositoryInterface::class);
+        $this->cashbackExtensionFactory = Mockery::mock(CashbackTrackingExtensionFactory::class);
         $this->afterCashbackTrackingSaveObserver = new AfterCashbackTrackingSaveObserver(
+            $this->cashbackExtensionFactory,
+            $this->cashbackTrackingRepository,
             $this->publisher,
             $this->logger
         );
@@ -45,12 +56,28 @@ class AfterCashbackTrackingSaveObserverTest extends TestCase
 
     public function testExecute()
     {
-        /** @var CashbackTracking $cashbackEntity */
         $cashbackEntity = Mockery::mock(CashbackTracking::class);
         $observer = Mockery::mock(Observer::class);
         $observer->shouldReceive('getData')
             ->with('data_object')
             ->andReturn($cashbackEntity);
+
+        $extensionAttributes = Mockery::mock(CashbackTrackingExtensionInterface::class);
+
+        $cashbackEntity->shouldReceive('getExtensionAttributes')
+            ->andReturn(null);
+
+        $this->cashbackExtensionFactory
+            ->shouldReceive('create')
+            ->andReturn($extensionAttributes);
+
+        $extensionAttributes->shouldReceive('setAction')
+            ->with('create')
+            ->andReturnSelf();
+
+        $cashbackEntity->shouldReceive('setExtensionAttributes')
+            ->with($extensionAttributes)
+            ->andReturnSelf();
 
         $this->publisher
             ->shouldReceive('publish')
@@ -62,14 +89,30 @@ class AfterCashbackTrackingSaveObserverTest extends TestCase
     public function testExecuteAndThrowException()
     {
         $observer = Mockery::mock(Observer::class);
+        $cashbackEntity = Mockery::mock(CashbackTracking::class);
+
         $observer->shouldReceive('getData')
             ->with('data_object')
-            ->andReturn(123);
+            ->andReturn($cashbackEntity);
+
+        $extensionAttributes = Mockery::mock(CashbackTrackingExtensionInterface::class);
+
+        $cashbackEntity->shouldReceive('getExtensionAttributes')
+            ->andReturn($extensionAttributes);
+
+        $extensionAttributes->shouldReceive('setAction')
+            ->with('create')
+            ->andReturnSelf();
+
+        $cashbackEntity->shouldReceive('setExtensionAttributes')
+            ->with($extensionAttributes)
+            ->andReturnSelf();
 
         $exception = Mockery::mock(\Exception::class);
+
         $this->publisher
             ->shouldReceive('publish')
-            ->with(AfterCashbackTrackingSaveObserver::TOPIC_NAME, 123)
+            ->with(AfterCashbackTrackingSaveObserver::TOPIC_NAME, $cashbackEntity)
             ->andThrow($exception);
 
         $this->logger

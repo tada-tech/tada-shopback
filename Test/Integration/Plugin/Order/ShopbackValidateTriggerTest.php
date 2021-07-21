@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Tada\Shopback\Test\Integration\Model\ResourceModel\Order\Plugin;
+namespace Tada\Shopback\Test\Integration\Plugin\Order;
 
 use Magento\Framework\Api\SearchCriteriaBuilder;
 use Magento\MysqlMq\Model\Message;
@@ -53,8 +53,6 @@ class ShopbackValidateTriggerTest extends TestCase
         /** @var OrderInterface $order */
         $order = $this->_getOrderHasCashbaskTrackingObject($quote);
 
-        $partner = $order->getExtensionAttributes()->getPartnerTracking();
-
         $this->assertEquals(Order::STATE_NEW, $order->getState());
 
         $order->setState(Order::STATE_CANCELED);
@@ -63,7 +61,9 @@ class ShopbackValidateTriggerTest extends TestCase
 
         $this->assertEquals(Order::STATE_CANCELED, $order->getState());
 
-        $topic = "shopback.validate_order";
+        $partner = $order->getExtensionAttributes()->getPartnerTracking();
+
+        $topic = "shopback.api";
 
         /** @var Message $message */
         $message = $this->getTopicLatestMessage($topic);
@@ -75,6 +75,10 @@ class ShopbackValidateTriggerTest extends TestCase
         $this->assertEquals($partner->getPartnerParameter(), $messageBody['partner_parameter']);
         $this->assertEquals($partner->getEntityId(), $messageBody['entity_id']);
         $this->assertEquals($partner->getOrderId(), $messageBody['order_id']);
+        $this->assertEquals(
+            $partner->getExtensionAttributes()->getAction(),
+            $messageBody['extension_attributes']['action']
+        );
     }
 
     /**
@@ -95,7 +99,7 @@ class ShopbackValidateTriggerTest extends TestCase
         $order = $this->orderRepository->save($order);
         $this->assertEquals(Order::STATE_COMPLETE, $order->getState());
 
-        $topic = "shopback.validate_order";
+        $topic = "shopback.api";
         $messageCollection = $this->_getListMessages($topic);
 
         $this->assertEquals(0, $messageCollection->getSize());
@@ -185,7 +189,7 @@ class ShopbackValidateTriggerTest extends TestCase
             ['status' => $messageStatusCollection->getMainTable()],
             "status.message_id = main_table.id"
         );
-        $messageCollection->addOrder('updated_at', MessageCollection::SORT_ORDER_DESC);
+        $messageCollection->addOrder('message_id', MessageCollection::SORT_ORDER_DESC);
         return $messageCollection;
     }
 

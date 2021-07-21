@@ -14,11 +14,18 @@
             <resource>Tada_Shopback::configuration</resource>
             <group id="general" translate="label" type="text" sortOrder="1000" showInDefault="1"
                    showInWebsite="0"
-                   showInStore="0"><label>General Settings</label>
+                   showInStore="0">
+                <label>General Settings</label>
                 <field id="cookie_timelife" translate="label comment" type="text" sortOrder="10" showInDefault="1"
                        showInWebsite="0" showInStore="0">
                     <label>Cookie timelife</label>
                     <comment>Unit: second. Example: 86400 = (1day), 1800 = (30 minutes), ...</comment>
+                </field>
+                <field id="shopback_status_mapping" translate="label" sortOrder="20" showInDefault="1"
+                       showInWebsite="0" showInStore="0">
+                    <label>Shopback Status Mapping</label>
+                    <frontend_model>Tada\Shopback\Block\Adminhtml\Form\Field\StatusMapping</frontend_model>
+                    <backend_model>Magento\Config\Model\Config\Backend\Serialized\ArraySerialized</backend_model>
                 </field>
             </group>
         </section>

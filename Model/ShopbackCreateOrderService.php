@@ -11,8 +11,9 @@ use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\Psr7\ResponseFactory;
 use GuzzleHttp\TransferStats;
 use Psr\Log\LoggerInterface;
+use Tada\Shopback\Model\ShopbackHttpAdapter;
 
-class ShopbackCreateOrderService extends ShopbackBaseService implements ShopbackCreateOrderInterface
+class ShopbackCreateOrderService implements ShopbackCreateOrderInterface
 {
     const API_REQUEST_URI = "http://mage.dev.local/";
     const API_REQUEST_ENDPOINT = "rest/V1/shopback/order";
@@ -23,18 +24,25 @@ class ShopbackCreateOrderService extends ShopbackBaseService implements Shopback
     protected $logger;
 
     /**
+     * @var ShopbackHttpAdapter
+     */
+    protected $http;
+
+    /**
      * ShopbackCreateOrderService constructor.
+     * @param ShopbackHttpAdapter $httpAdapter
      * @param LoggerInterface $logger
      * @param ClientFactory $clientFactory
      * @param ResponseFactory $responseFactory
      */
     public function __construct(
+        ShopbackHttpAdapter $httpAdapter,
         LoggerInterface  $logger,
         ClientFactory $clientFactory,
         ResponseFactory $responseFactory
     ) {
+        $this->http = $httpAdapter;
         $this->logger = $logger;
-        parent::__construct($clientFactory, $responseFactory);
     }
 
     /**
@@ -52,8 +60,8 @@ class ShopbackCreateOrderService extends ShopbackBaseService implements Shopback
                 'adv_sub' => $order->getEntityId(),
                 'adv_sub5' => $order->getOrderCurrencyCode(),
                 'transaction_id' => $partner->getPartnerParameter(),
-                'datetime' => $this->formatDateTime($order->getCreatedAt()), //need format GMT +7 Asia/Bangkok
-                'timezone' => self::BANGKOK_TIME_ZONE,
+                'datetime' => $this->http->formatDateTime($order->getCreatedAt()), //need format GMT +7 Asia/Bangkok
+                'timezone' => ShopbackHttpAdapter::BANGKOK_TIME_ZONE,
                 'security_token' => "MERCHANT TOKEN ISSUED"
             ],
             RequestOptions::ON_STATS => function (TransferStats $stats) use (&$fullRequestUrl) {
@@ -62,7 +70,9 @@ class ShopbackCreateOrderService extends ShopbackBaseService implements Shopback
         ];
 
         /** @var Response $response */
-        $response = $this->doRequest(self::API_REQUEST_ENDPOINT, $params);
+        $response = $this->http
+            ->setBaseUri(self::API_REQUEST_URI)
+            ->doRequest(self::API_REQUEST_ENDPOINT, $params);
 
         //START LOGGING
         $this->logger->info('Request: ' . $fullRequestUrl);

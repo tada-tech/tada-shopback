@@ -7,11 +7,11 @@ use Magento\Sales\Model\ResourceModel\Order as ResourceOrder;
 use Magento\Sales\Model\Order;
 use Magento\Framework\Event\ManagerInterface as EventManager;
 use Magento\Sales\Api\OrderRepositoryInterface;
+use Tada\Shopback\Helper\Data;
 
 class ShopbackValidateTrigger
 {
-    const ALLOW_STATE_TO_TRIGGER = [Order::STATE_COMPLETE, Order::STATE_CANCELED];
-
+    protected $configData;
     /**
      * @var OrderRepositoryInterface
      */
@@ -23,13 +23,16 @@ class ShopbackValidateTrigger
 
     /**
      * ShopbackValidateTrigger constructor.
+     * @param Data $configData
      * @param OrderRepositoryInterface $orderRepository
      * @param EventManager $eventManager
      */
     public function __construct(
+        Data $configData,
         OrderRepositoryInterface $orderRepository,
         EventManager $eventManager
     ) {
+        $this->configData = $configData;
         $this->orderRepository = $orderRepository;
         $this->eventManager = $eventManager;
     }
@@ -58,7 +61,8 @@ class ShopbackValidateTrigger
         $oldState = $orderModel->getOrigData('state');
         $newState = $orderModel->getData('state');
 
-        if ($oldState != $newState && in_array($newState, self::ALLOW_STATE_TO_TRIGGER)) {
+        $allowedStates = $this->configData->getAllowedOrderStateToTriggerValidate();
+        if ($oldState != $newState && in_array($newState, $allowedStates)) {
             $this->eventManager->dispatch(
                 'order_call_shopback_validate_request',
                 ['order_partner_tracking' => $orderPartnerTracking]

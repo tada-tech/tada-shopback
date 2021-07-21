@@ -8,8 +8,10 @@ use Magento\Framework\MessageQueue\PublisherInterface;
 use PHPUnit\Framework\TestCase;
 use Mockery;
 use Psr\Log\LoggerInterface;
+use Tada\CashbackTracking\Api\Data\CashbackTrackingExtensionFactory;
 use Tada\CashbackTracking\Model\CashbackTracking;
 use Tada\Shopback\Observer\ShopbackValidateOrderObserver;
+use Tada\CashbackTracking\Api\Data\CashbackTrackingExtensionInterface;
 
 class ShopbackValidateOrderObserverTest extends TestCase
 {
@@ -28,11 +30,18 @@ class ShopbackValidateOrderObserverTest extends TestCase
      */
     protected $shopbackValidateOrderObserver;
 
+    /**
+     * @var Mockery\MockInterface
+     */
+    protected $cashbackExtensionFactory;
+
     protected function setUp()
     {
         $this->logger = Mockery::mock(LoggerInterface::class);
         $this->publisher = Mockery::mock(PublisherInterface::class);
+        $this->cashbackExtensionFactory = Mockery::mock(CashbackTrackingExtensionFactory::class);
         $this->shopbackValidateOrderObserver = new ShopbackValidateOrderObserver(
+            $this->cashbackExtensionFactory,
             $this->publisher,
             $this->logger
         );
@@ -52,6 +61,18 @@ class ShopbackValidateOrderObserverTest extends TestCase
             ->with('order_partner_tracking')
             ->andReturn($orderCashbackTrackingEntity);
 
+        $extensionAttributes = Mockery::mock(CashbackTrackingExtensionInterface::class);
+        $orderCashbackTrackingEntity->shouldReceive('getExtensionAttributes')
+            ->andReturn($extensionAttributes);
+
+        $extensionAttributes->shouldReceive('setAction')
+            ->with('validate')
+            ->andReturnSelf();
+
+        $orderCashbackTrackingEntity->shouldReceive('setExtensionAttributes')
+            ->with($extensionAttributes)
+            ->andReturnSelf();
+
         $this->publisher->shouldReceive('publish')
             ->with(ShopbackValidateOrderObserver::TOPIC_NAME, $orderCashbackTrackingEntity);
 
@@ -62,13 +83,26 @@ class ShopbackValidateOrderObserverTest extends TestCase
     {
         $observer = Mockery::mock(Observer::class);
 
+        $orderCashbackTrackingEntity = Mockery::mock(CashbackTracking::class);
         $observer->shouldReceive('getData')
             ->with('order_partner_tracking')
-            ->andReturn(null);
+            ->andReturn($orderCashbackTrackingEntity);
+
+        $extensionAttributes = Mockery::mock(CashbackTrackingExtensionInterface::class);
+        $orderCashbackTrackingEntity->shouldReceive('getExtensionAttributes')
+            ->andReturn($extensionAttributes);
+
+        $extensionAttributes->shouldReceive('setAction')
+            ->with('validate')
+            ->andReturnSelf();
+
+        $orderCashbackTrackingEntity->shouldReceive('setExtensionAttributes')
+            ->with($extensionAttributes)
+            ->andReturnSelf();
 
         $e = Mockery::mock(\Exception::class);
         $this->publisher->shouldReceive('publish')
-            ->with(ShopbackValidateOrderObserver::TOPIC_NAME, null)
+            ->with(ShopbackValidateOrderObserver::TOPIC_NAME, $orderCashbackTrackingEntity)
             ->andThrow($e);
 
         $this->logger->shouldReceive('error')

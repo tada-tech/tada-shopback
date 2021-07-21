@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Tada\Shopback\Test\Unit\Model\ResourceModel\Order\Plugin;
+namespace Tada\Shopback\Test\Unit\Plugin\Order;
 
 use Magento\Framework\Model\AbstractModel;
 use Magento\Framework\Event\ManagerInterface as EventManager;
@@ -9,12 +9,17 @@ use Magento\Sales\Api\OrderRepositoryInterface;
 use Magento\Sales\Model\ResourceModel\Order as ResourceOrder;
 use PHPUnit\Framework\TestCase;
 use Mockery;
+use Tada\Shopback\Helper\Data;
 use Tada\Shopback\Plugin\Order\ShopbackValidateTrigger;
 use Tada\CashbackTracking\Api\Data\CashbackTrackingInterface;
 use Magento\Sales\Model\Order;
 
 class ShopbackValidateTriggerTest extends TestCase
 {
+    /**
+     * @var Mockery\MockInterface
+     */
+    protected $configData;
     /**
      * @var Mockery\MockInterface
      */
@@ -32,9 +37,11 @@ class ShopbackValidateTriggerTest extends TestCase
 
     protected function setUp()
     {
+        $this->configData = Mockery::mock(Data::class);
         $this->orderRepository = Mockery::mock(OrderRepositoryInterface::class);
         $this->eventManager = Mockery::mock(EventManager::class);
         $this->shopbackValidateTrigger = new ShopbackValidateTrigger(
+            $this->configData,
             $this->orderRepository,
             $this->eventManager
         );
@@ -79,6 +86,10 @@ class ShopbackValidateTriggerTest extends TestCase
         $orderModel->shouldReceive('getData')
             ->with('state')
             ->andReturn(Order::STATE_COMPLETE);
+
+        $allowStates = ['complete', 'cancled'];
+        $this->configData->shouldReceive('getAllowedOrderStateToTriggerValidate')
+            ->andReturn($allowStates);
 
         $data = ['order_partner_tracking' => $partnerTracking];
         $this->eventManager

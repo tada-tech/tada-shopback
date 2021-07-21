@@ -21,9 +21,6 @@ use Tada\CashbackTracking\Model\CashbackTracking;
 use Tada\CashbackTracking\Model\CashbackTrackingFactory;
 use Tada\Shopback\Observer\AfterCashbackTrackingSaveObserver;
 
-/**
- * @magentoAppIsolation enabled
- */
 class AfterCashbackTrackingSaveObserverTest extends TestCase
 {
     /**
@@ -62,6 +59,7 @@ class AfterCashbackTrackingSaveObserverTest extends TestCase
 
     /**
      * @magentoDataFixture Magento/Sales/_files/quote.php
+     * @magentoAppIsolation enabled
      */
     public function testExecute()
     {
@@ -93,7 +91,11 @@ class AfterCashbackTrackingSaveObserverTest extends TestCase
         $messageBody = json_decode($message->getBody(), true);
 
         foreach ($messageBody as $key => $value) {
-            $this->assertEquals($cashbackTrackingEntity->getData($key), $value);
+            if ($key == 'extension_attributes') {
+                $this->assertEquals($cashbackTrackingEntity->getData($key)->getAction(), 'create');
+            } else {
+                $this->assertEquals($cashbackTrackingEntity->getData($key), $value);
+            }
         }
     }
 

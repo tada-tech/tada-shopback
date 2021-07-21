@@ -10,11 +10,11 @@ use Magento\Framework\Webapi\Rest\Request;
 use GuzzleHttp\ClientFactory;
 use GuzzleHttp\Exception\GuzzleException;
 
-abstract class ShopbackBaseService
+class ShopbackHttpAdapter
 {
-    const API_REQUEST_URI = "";
-    const API_REQUEST_ENDPOINT = "";
     const BANGKOK_TIME_ZONE = "Asia/Bangkok";
+
+    protected $baseUri = "";
 
     /**
      * @var ClientFactory
@@ -40,16 +40,26 @@ abstract class ShopbackBaseService
     }
 
     /**
+     * @param string $uri
+     * @return $this
+     */
+    public function setBaseUri(string $uri)
+    {
+        $this->baseUri = $uri;
+        return $this;
+    }
+
+    /**
      * @param $uriEndpoint
      * @param array $params
      * @param string $requestMethod
      * @return Response
      */
-    protected function doRequest($uriEndpoint, $params = [], $requestMethod = Request::HTTP_METHOD_GET): Response
+    public function doRequest($uriEndpoint, $params = [], $requestMethod = Request::HTTP_METHOD_GET): Response
     {
         /** @var Client $client */
         $client = $this->clientFactory->create(['config' => [
-            'base_uri' => static::API_REQUEST_URI
+            'base_uri' => $this->baseUri
         ]]);
 
         try {

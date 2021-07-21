@@ -1,15 +1,6 @@
 <?xml version="1.0"?>
-<!--
-/**
- * Copyright © Magento, Inc. All rights reserved.
- * See COPYING.txt for license details.
- */
--->
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Communication/etc/communication.xsd">
-    <topic name="shopback.create_order" request="Tada\CashbackTracking\Api\Data\CashbackTrackingInterface">
-        <handler name="shopbackCreateOrder" type="Tada\Shopback\Model\ShopbackCreateOrder\Consumer" method="process" />
-    </topic>
-    <topic name="shopback.validate_order" request="Tada\CashbackTracking\Api\Data\CashbackTrackingInterface">
-        <handler name="shopbackValidateOrder" type="Tada\Shopback\Model\ShopbackValidateOrder\Consumer" method="process" />
+    <topic name="shopback.api" request="Tada\CashbackTracking\Api\Data\CashbackTrackingInterface">
+        <handler name="shopbackApiCreateAndValidateOrder" type="Tada\Shopback\Model\Queue\Consumer" method="process" />
     </topic>
 </config>
