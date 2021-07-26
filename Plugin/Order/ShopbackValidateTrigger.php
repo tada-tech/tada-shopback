@@ -4,7 +4,6 @@ declare(strict_types=1);
 namespace Tada\Shopback\Plugin\Order;
 
 use Magento\Sales\Model\ResourceModel\Order as ResourceOrder;
-use Magento\Sales\Model\Order;
 use Magento\Framework\Event\ManagerInterface as EventManager;
 use Magento\Sales\Api\OrderRepositoryInterface;
 use Tada\Shopback\Helper\Data;

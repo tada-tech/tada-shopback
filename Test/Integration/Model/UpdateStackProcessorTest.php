@@ -1,20 +1,20 @@
 <?php
 declare(strict_types=1);
 
-namespace Tada\Shopback\Test\Integration\Model;
+namespace Tada\Shopback\Test\Integration;
 
 use Magento\Framework\Api\SearchCriteriaBuilder;
 use Magento\Quote\Api\CartManagementInterface;
 use Magento\Quote\Api\CartRepositoryInterface;
 use Magento\Quote\Model\Quote;
 use Magento\Quote\Model\Quote\Address\Rate;
+use Magento\Sales\Api\OrderRepositoryInterface;
 use Magento\TestFramework\Helper\Bootstrap;
 use PHPUnit\Framework\TestCase;
-use Tada\Shopback\Api\Data\ShopbackStackSearchResultInterface;
 use Tada\Shopback\Api\ShopbackStackRepositoryInterface;
-use Tada\Shopback\Model\ShopbackStack;
+use Tada\Shopback\Model\UpdateStackProcessor;
 
-class ShopbackStackRepositoryTest extends TestCase
+class UpdateStackProcessorTest extends TestCase
 {
     /**
      * @var \Magento\Framework\ObjectManagerInterface
@@ -24,7 +24,17 @@ class ShopbackStackRepositoryTest extends TestCase
     /**
      * @var ShopbackStackRepositoryInterface
      */
-    protected $repository;
+    protected $shopbackStackRepository;
+
+    /**
+     * @var OrderRepositoryInterface
+     */
+    protected $orderRepository;
+
+    /**
+     * @var UpdateStackProcessor
+     */
+    protected $updateStackProcessor;
 
     protected $cartManagement;
 
@@ -32,70 +42,45 @@ class ShopbackStackRepositoryTest extends TestCase
     {
         $this->objectManager = Bootstrap::getObjectManager();
         $this->cartManagement = $this->objectManager->create(CartManagementInterface::class);
-        $this->repository = $this->objectManager->get(ShopbackStackRepositoryInterface::class);
+        $this->shopbackStackRepository = $this->objectManager->create(ShopbackStackRepositoryInterface::class);
+        $this->orderRepository = $this->objectManager->create(OrderRepositoryInterface::class);
+
+        $servicePool = [];
+        $servicePool['create'] = $this->objectManager
+            ->create(\Tada\Shopback\Api\ShopbackCreateOrderInterface::class);
+        $servicePool['validate'] = $this->objectManager
+            ->create(\Tada\Shopback\Api\ShopbackValidateOrderInterface::class);
+
+        $this->updateStackProcessor = new UpdateStackProcessor(
+            $this->shopbackStackRepository,
+            $this->orderRepository,
+            $servicePool
+        );
     }
 
     /**
-     * @magentoDbIsolation enabled
-     * @magentoAppIsolation enabled
      * @magentoDataFixture Magento/Sales/_files/quote.php
-     */
-    public function testGetPendingItems()
-    {
-        $orderId = $this->_getOrderId();
-        /** @var ShopbackStackSearchResultInterface $result */
-        $result = $this->repository->getPendingItems();
-        $this->assertEquals(1, $result->getTotalCount());
-    }
-
-
-    /**
-     * @magentoDbIsolation enabled
      * @magentoAppIsolation enabled
-     * @magentoDataFixture Magento/Sales/_files/quote.php
-     */
-    public function testAddToStackWithAction()
-    {
-        $orderId = $this->_getOrderId();
-        $result = $this->repository->addToStackWithAction($orderId, 'validate');
-        $this->assertNotFalse($result);
-        $this->assertEquals('pending', $result->getStatus());
-        $this->assertEquals('validate', $result->getAction());
-        $this->assertEquals($orderId, $result->getOrderId());
-        $this->assertNotNull($result->getCreatedAt());
-        $this->assertNull($result->getUpdatedAt());
-    }
-
-    /**
      * @magentoDbIsolation enabled
-     * @magentoAppIsolation enabled
-     * @magentoDataFixture Magento/Sales/_files/quote.php
      */
-    public function testMakeDone()
-    {
-        $orderId = $this->_getOrderId();
-
-        /** @var ShopbackStack $stackItem */
-        $stackItem = $this->repository->addToStackWithAction($orderId, 'create');
-
-        $this->assertNotFalse($stackItem);
-        $this->assertEquals('pending', $stackItem->getStatus());
-
-        /** @var ShopbackStack $result */
-        $result = $stackItem->done();
-
-        $this->assertEquals('done', $result->getStatus());
-    }
-
-    protected function _getOrderId()
+    public function testExecute()
     {
         $quote = $this->_getQuote('test01');
         $quote = $this->_prepareQuote($quote);
 
-        $orderId = $this->cartManagement->placeOrder($quote->getId());
-        return (int)$orderId;
-    }
+        $orderId = (int)$this->cartManagement->placeOrder($quote->getId());
 
+        $stackItem = $this->shopbackStackRepository->addToStackWithAction($orderId, 'create');
+
+        $this->assertEquals('pending', $stackItem->getStatus());
+
+        //Execute Cron
+        $this->updateStackProcessor->execute();
+
+        $pendingList = $this->shopbackStackRepository->getPendingItems();
+
+        $this->assertEquals(0, $pendingList->getTotalCount());
+    }
 
     /**
      * Gets quote by reserved order ID.

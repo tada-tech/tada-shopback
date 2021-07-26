@@ -16,6 +16,19 @@
     <preference for="Tada\Shopback\Api\ShopbackStackRepositoryInterface"
                 type="Tada\Shopback\Model\ShopbackStackRepository" />
 
+    <preference for="Tada\Shopback\Api\UpdateStackProcessorInterface"
+                type="Tada\Shopback\Model\UpdateStackProcessor" />
+
+    <type name="Tada\Shopback\Model\UpdateStackProcessor">
+        <arguments>
+            <argument name="servicePool" xsi:type="array">
+                <item name="create" xsi:type="object">Tada\Shopback\Api\ShopbackCreateOrderInterface</item>
+                <item name="validate" xsi:type="object">Tada\Shopback\Api\ShopbackValidateOrderInterface</item>
+            </argument>
+        </arguments>
+    </type>
+
+
     <preference for="Tada\Shopback\Api\FakeShopbackRepositoryInterface"
                 type="Tada\Shopback\Model\FakeShopbackRepository" />
 

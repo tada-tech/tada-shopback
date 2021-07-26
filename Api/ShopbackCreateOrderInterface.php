@@ -6,7 +6,7 @@ namespace Tada\Shopback\Api;
 use GuzzleHttp\Psr7\Response;
 use Magento\Sales\Api\Data\OrderInterface;
 
-interface ShopbackCreateOrderInterface
+interface ShopbackCreateOrderInterface extends ShopbackServiceInterface
 {
     /**
      * @param OrderInterface $order

@@ -60,7 +60,7 @@ class FakeShopbackRepository implements FakeShopbackRepositoryInterface
 
         $params = $this->request->getParams();
 
-        $response->setSuccess(false);
+        $response->setSuccess(true);
         return $response;
     }
 }
