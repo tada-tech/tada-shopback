@@ -1,9 +1,0 @@
-<?xml version="1.0"?>
-<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework-message-queue:etc/consumer.xsd">
-    <consumer name="shopbackApiCreateAndValidateOrder"
-              queue="shopback_api_create_and_validate_order"
-              connection="db"
-              maxMessages="10000"
-              consumerInstance="Magento\Framework\MessageQueue\Consumer"
-              handler="Tada\Shopback\Model\Queue\Consumer::process" />
-</config>

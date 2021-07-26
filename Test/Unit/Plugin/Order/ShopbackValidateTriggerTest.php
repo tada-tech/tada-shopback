@@ -87,7 +87,7 @@ class ShopbackValidateTriggerTest extends TestCase
             ->with('state')
             ->andReturn(Order::STATE_COMPLETE);
 
-        $allowStates = ['complete', 'cancled'];
+        $allowStates = ['complete', 'canceled'];
         $this->configData->shouldReceive('getAllowedOrderStateToTriggerValidate')
             ->andReturn($allowStates);
 

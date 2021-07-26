@@ -57,7 +57,7 @@ class ShopbackValidateOrderService implements ShopbackValidateOrderInterface
     /**
      * @param OrderInterface $order
      */
-    public function execute(OrderInterface $order): void
+    public function execute(OrderInterface $order): Response
     {
         $params = [
             'query' => [
@@ -82,6 +82,8 @@ class ShopbackValidateOrderService implements ShopbackValidateOrderInterface
         //START LOGGING
         $this->logger->info('Request: ' . $fullRequestUrl);
         $this->logger->info('Response: StatusCode: ' . $response->getStatusCode()
-            . ', ResponseBody: ' . $response->getBody()->getContents());
+            . ', ResponseBody: ' . $response->getBody());
+
+        return $response;
     }
 }

@@ -7,6 +7,15 @@
     <preference for="Tada\Shopback\Api\ShopbackValidateOrderInterface"
                 type="Tada\Shopback\Model\ShopbackValidateOrderService" />
 
+    <preference for="Tada\Shopback\Api\Data\ShopbackStackInterface"
+                type="Tada\Shopback\Model\ShopbackStack" />
+
+    <preference for="Tada\Shopback\Api\Data\ShopbackStackSearchResultInterface"
+                type="Magento\Framework\Api\SearchResultsInterface" />
+
+    <preference for="Tada\Shopback\Api\ShopbackStackRepositoryInterface"
+                type="Tada\Shopback\Model\ShopbackStackRepository" />
+
     <preference for="Tada\Shopback\Api\FakeShopbackRepositoryInterface"
                 type="Tada\Shopback\Model\FakeShopbackRepository" />
 

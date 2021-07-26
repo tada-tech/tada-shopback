@@ -11,6 +11,8 @@ use Psr\Log\LoggerInterface;
 use Tada\CashbackTracking\Api\CashbackTrackingRepositoryInterface;
 use Tada\CashbackTracking\Api\Data\CashbackTrackingExtensionFactory;
 use Tada\CashbackTracking\Model\CashbackTracking;
+use Tada\Shopback\Api\Data\ShopbackStackInterface;
+use Tada\Shopback\Api\ShopbackStackRepositoryInterface;
 use Tada\Shopback\Observer\AfterCashbackTrackingSaveObserver;
 use Tada\CashbackTracking\Api\Data\CashbackTrackingExtensionInterface;
 
@@ -22,29 +24,22 @@ class AfterCashbackTrackingSaveObserverTest extends TestCase
     protected $logger;
 
     /**
-     * @var Mockery\MockInterface
-     */
-    protected $publisher;
-
-    /**
      * @var AfterCashbackTrackingSaveObserver
      */
     protected $afterCashbackTrackingSaveObserver;
 
     protected $cashbackTrackingRepository;
 
-    protected $cashbackExtensionFactory;
+    protected $shopbackStackRepository;
 
     protected function setUp()
     {
         $this->logger = Mockery::mock(LoggerInterface::class);
-        $this->publisher = Mockery::mock(PublisherInterface::class);
         $this->cashbackTrackingRepository = Mockery::mock(CashbackTrackingRepositoryInterface::class);
-        $this->cashbackExtensionFactory = Mockery::mock(CashbackTrackingExtensionFactory::class);
+        $this->shopbackStackRepository = Mockery::mock(ShopbackStackRepositoryInterface::class);
         $this->afterCashbackTrackingSaveObserver = new AfterCashbackTrackingSaveObserver(
-            $this->cashbackExtensionFactory,
+            $this->shopbackStackRepository,
             $this->cashbackTrackingRepository,
-            $this->publisher,
             $this->logger
         );
     }
@@ -62,26 +57,16 @@ class AfterCashbackTrackingSaveObserverTest extends TestCase
             ->with('data_object')
             ->andReturn($cashbackEntity);
 
-        $extensionAttributes = Mockery::mock(CashbackTrackingExtensionInterface::class);
+        $orderId = 1;
 
-        $cashbackEntity->shouldReceive('getExtensionAttributes')
-            ->andReturn(null);
+        $cashbackEntity->shouldReceive('getOrderId')
+            ->andReturn($orderId);
 
-        $this->cashbackExtensionFactory
-            ->shouldReceive('create')
-            ->andReturn($extensionAttributes);
-
-        $extensionAttributes->shouldReceive('setAction')
-            ->with('create')
-            ->andReturnSelf();
-
-        $cashbackEntity->shouldReceive('setExtensionAttributes')
-            ->with($extensionAttributes)
-            ->andReturnSelf();
-
-        $this->publisher
-            ->shouldReceive('publish')
-            ->with(AfterCashbackTrackingSaveObserver::TOPIC_NAME, $cashbackEntity);
+        $shopbackStack = Mockery::mock(ShopbackStackInterface::class);
+        $this->shopbackStackRepository
+            ->shouldReceive('addToStackWithAction')
+            ->with($orderId, 'create')
+            ->andReturn($shopbackStack);
 
         $this->assertNull($this->afterCashbackTrackingSaveObserver->execute($observer));
     }
@@ -95,25 +80,18 @@ class AfterCashbackTrackingSaveObserverTest extends TestCase
             ->with('data_object')
             ->andReturn($cashbackEntity);
 
-        $extensionAttributes = Mockery::mock(CashbackTrackingExtensionInterface::class);
 
-        $cashbackEntity->shouldReceive('getExtensionAttributes')
-            ->andReturn($extensionAttributes);
+        $orderId = 1;
 
-        $extensionAttributes->shouldReceive('setAction')
-            ->with('create')
-            ->andReturnSelf();
-
-        $cashbackEntity->shouldReceive('setExtensionAttributes')
-            ->with($extensionAttributes)
-            ->andReturnSelf();
+        $cashbackEntity->shouldReceive('getOrderId')
+            ->andReturn($orderId);
 
         $exception = Mockery::mock(\Exception::class);
 
-        $this->publisher
-            ->shouldReceive('publish')
-            ->with(AfterCashbackTrackingSaveObserver::TOPIC_NAME, $cashbackEntity)
-            ->andThrow($exception);
+        $this->shopbackStackRepository
+            ->shouldReceive('addToStackWithAction')
+            ->with($orderId, 'create')
+            ->andReturn($exception);
 
         $this->logger
             ->shouldReceive('error')

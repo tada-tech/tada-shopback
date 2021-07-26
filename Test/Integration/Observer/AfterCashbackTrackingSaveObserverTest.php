@@ -5,10 +5,6 @@ namespace Tada\Shopback\Test\Integration\Observer;
 
 use Magento\Framework\Api\SearchCriteriaBuilder;
 use Magento\Framework\MessageQueue\PublisherInterface;
-use Magento\MysqlMq\Model\Message;
-use Magento\MysqlMq\Model\QueueManagement;
-use Magento\MysqlMq\Model\ResourceModel\MessageCollection;
-use Magento\MysqlMq\Model\ResourceModel\MessageStatusCollection;
 use Magento\Quote\Api\CartManagementInterface;
 use Magento\Quote\Api\CartRepositoryInterface;
 use Magento\Quote\Api\Data\CartInterface;
@@ -17,16 +13,21 @@ use Magento\Quote\Model\Quote\Address\Rate;
 use PHPUnit\Framework\TestCase;
 use Magento\TestFramework\Helper\Bootstrap;
 use Tada\CashbackTracking\Api\CashbackTrackingRepositoryInterface;
-use Tada\CashbackTracking\Model\CashbackTracking;
 use Tada\CashbackTracking\Model\CashbackTrackingFactory;
-use Tada\Shopback\Observer\AfterCashbackTrackingSaveObserver;
+use Tada\Shopback\Api\Data\ShopbackStackInterface;
+use Tada\Shopback\Api\ShopbackStackRepositoryInterface;
 
 class AfterCashbackTrackingSaveObserverTest extends TestCase
 {
     /**
+     * @var ShopbackStackRepositoryInterface
+     */
+    protected $shopbackStackRepository;
+
+    /**
      * @var \Magento\Framework\ObjectManagerInterface
      */
-    protected $_objectManager;
+    protected $objectManager;
 
     /**
      * @var CashbackTrackingFactory
@@ -51,15 +52,16 @@ class AfterCashbackTrackingSaveObserverTest extends TestCase
     protected function setUp()
     {
         $this->objectManager = Bootstrap::getObjectManager();
+        $this->shopbackStackRepository = $this->objectManager->get(ShopbackStackRepositoryInterface::class);
         $this->cashbackTrackingFactory = $this->objectManager->create(CashbackTrackingFactory::class);
         $this->cashbackTrackingRepository = $this->objectManager->create(CashbackTrackingRepositoryInterface::class);
-        $this->publisher = $this->objectManager->create(PublisherInterface::class);
         $this->cartManagement = $this->objectManager->create(CartManagementInterface::class);
     }
 
     /**
-     * @magentoDataFixture Magento/Sales/_files/quote.php
      * @magentoAppIsolation enabled
+     * @magentoDbIsolation enabled
+     * @magentoDataFixture Magento/Sales/_files/quote.php
      */
     public function testExecute()
     {
@@ -76,27 +78,18 @@ class AfterCashbackTrackingSaveObserverTest extends TestCase
                 'partner_parameter' => 'happynewyear'
             ]
         );
+
         $cashbackTrackingEntity = $this->cashbackTrackingRepository->save($cashbackTracking);
-        $this->assertInstanceOf(CashbackTracking::class, $cashbackTrackingEntity);
 
-        $this->publisher->publish(AfterCashbackTrackingSaveObserver::TOPIC_NAME, $cashbackTrackingEntity);
+        $pendingList = $this->shopbackStackRepository->getPendingItems();
 
-        $messageCollection = $this->_getListMessages(AfterCashbackTrackingSaveObserver::TOPIC_NAME);
-
-        /** @var Message $message */
-        $message = $messageCollection->getFirstItem();
-
-        $this->assertEquals(QueueManagement::MESSAGE_STATUS_NEW, $message->getStatus());
-
-        $messageBody = json_decode($message->getBody(), true);
-
-        foreach ($messageBody as $key => $value) {
-            if ($key == 'extension_attributes') {
-                $this->assertEquals($cashbackTrackingEntity->getData($key)->getAction(), 'create');
-            } else {
-                $this->assertEquals($cashbackTrackingEntity->getData($key), $value);
-            }
-        }
+        $items = $pendingList->getItems();
+        /** @var ShopbackStackInterface $item */
+        $item = array_pop($items);
+        $this->assertEquals(1, $pendingList->getTotalCount());
+        $this->assertEquals('create', $item->getAction());
+        $this->assertEquals('pending', $item->getStatus());
+        $this->assertEquals($orderId, $item->getOrderId());
     }
 
     /**
@@ -144,20 +137,5 @@ class AfterCashbackTrackingSaveObserverTest extends TestCase
         $quoteRepository->save($quote);
 
         return $quote;
-    }
-
-    private function _getListMessages($topic): MessageCollection
-    {
-        // Assert message status is error
-        $messageCollection = $this->objectManager->create(MessageCollection::class);
-        $messageStatusCollection = $this->objectManager->create(MessageStatusCollection::class);
-
-        $messageCollection->addFilter('topic_name', $topic);
-        $messageCollection->join(
-            ['status' => $messageStatusCollection->getMainTable()],
-            "status.message_id = main_table.id"
-        );
-        $messageCollection->addOrder('updated_at', MessageCollection::SORT_ORDER_DESC);
-        return $messageCollection;
     }
 }

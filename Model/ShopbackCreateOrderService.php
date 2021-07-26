@@ -48,7 +48,7 @@ class ShopbackCreateOrderService implements ShopbackCreateOrderInterface
     /**
      * @param OrderInterface $order
      */
-    public function execute(OrderInterface $order): void
+    public function execute(OrderInterface $order): Response
     {
         /** @var \Tada\CashbackTracking\Api\Data\CashbackTrackingInterface $partner */
         $partner = $order->getExtensionAttributes()->getPartnerTracking();
@@ -78,6 +78,8 @@ class ShopbackCreateOrderService implements ShopbackCreateOrderInterface
         $this->logger->info('Request: ' . $fullRequestUrl);
 
         $this->logger->info('Response: StatusCode: ' . $response->getStatusCode()
-            . ', ResponseBody: ' . $response->getBody()->getContents());
+            . ', ResponseBody: ' . $response->getBody());
+
+        return $response;
     }
 }

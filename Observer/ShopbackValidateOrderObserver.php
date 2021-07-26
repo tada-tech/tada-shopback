@@ -5,24 +5,16 @@ namespace Tada\Shopback\Observer;
 
 use Magento\Framework\Event\Observer;
 use Magento\Framework\Event\ObserverInterface;
-use Magento\Framework\MessageQueue\PublisherInterface;
 use Psr\Log\LoggerInterface;
-use Tada\CashbackTracking\Api\Data\CashbackTrackingExtensionFactory;
 use Tada\CashbackTracking\Api\Data\CashbackTrackingInterface;
+use Tada\Shopback\Api\ShopbackStackRepositoryInterface;
 
 class ShopbackValidateOrderObserver implements ObserverInterface
 {
-    const TOPIC_NAME = "shopback.api";
-
     /**
-     * @var CashbackTrackingExtensionFactory
+     * @var ShopbackStackRepositoryInterface
      */
-    protected $cashbackExtensionFactory;
-
-    /**
-     * @var PublisherInterface
-     */
-    protected $publisher;
+    protected $shopbackStackRepository;
 
     /**
      * @var LoggerInterface
@@ -31,17 +23,14 @@ class ShopbackValidateOrderObserver implements ObserverInterface
 
     /**
      * ShopbackValidateOrderObserver constructor.
-     * @param CashbackTrackingExtensionFactory $cashbackExtensionFactory
-     * @param PublisherInterface $publisher
+     * @param ShopbackStackRepositoryInterface $shopbackStackRepository
      * @param LoggerInterface $logger
      */
     public function __construct(
-        CashbackTrackingExtensionFactory $cashbackExtensionFactory,
-        PublisherInterface $publisher,
+        ShopbackStackRepositoryInterface $shopbackStackRepository,
         LoggerInterface $logger
     ) {
-        $this->cashbackExtensionFactory = $cashbackExtensionFactory;
-        $this->publisher = $publisher;
+        $this->shopbackStackRepository = $shopbackStackRepository;
         $this->logger = $logger;
     }
 
@@ -52,12 +41,10 @@ class ShopbackValidateOrderObserver implements ObserverInterface
     {
         /** @var CashbackTrackingInterface $cashbackTracking */
         $cashbackTracking = $observer->getData('order_partner_tracking');
-        $extensionAttributes = $cashbackTracking->getExtensionAttributes() ?? $this->cashbackExtensionFactory->create();
-        $extensionAttributes->setAction('validate');
-        $cashbackTracking->setExtensionAttributes($extensionAttributes);
+        $orderId = (int)$cashbackTracking->getOrderId();
 
         try {
-            $this->publisher->publish(self::TOPIC_NAME, $cashbackTracking);
+            $this->shopbackStackRepository->addToStackWithAction($orderId, 'validate');
         } catch (\Exception $e) {
             $this->logger->error($e);
         }

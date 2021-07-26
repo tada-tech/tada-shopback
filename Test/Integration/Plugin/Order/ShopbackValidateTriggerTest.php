@@ -4,10 +4,6 @@ declare(strict_types=1);
 namespace Tada\Shopback\Test\Integration\Plugin\Order;
 
 use Magento\Framework\Api\SearchCriteriaBuilder;
-use Magento\MysqlMq\Model\Message;
-use Magento\MysqlMq\Model\QueueManagement;
-use Magento\MysqlMq\Model\ResourceModel\MessageCollection;
-use Magento\MysqlMq\Model\ResourceModel\MessageStatusCollection;
 use Magento\Quote\Api\CartManagementInterface;
 use Magento\Quote\Api\CartRepositoryInterface;
 use Magento\Quote\Model\Quote;
@@ -18,9 +14,14 @@ use Magento\TestFramework\Helper\Bootstrap;
 use PHPUnit\Framework\TestCase;
 use Magento\Sales\Api\Data\OrderInterface;
 use Magento\Quote\Api\Data\CartInterface;
+use Tada\Shopback\Api\ShopbackStackRepositoryInterface;
 
 class ShopbackValidateTriggerTest extends TestCase
 {
+    /**
+     * @var ShopbackStackRepositoryInterface
+     */
+    protected $shopbackStackRepository;
     /**
      * @var \Magento\Framework\ObjectManagerInterface
      */
@@ -39,13 +40,15 @@ class ShopbackValidateTriggerTest extends TestCase
     protected function setUp()
     {
         $this->objectManager = $this->objectManager = Bootstrap::getObjectManager();
+        $this->shopbackStackRepository = $this->objectManager->get(ShopbackStackRepositoryInterface::class);
         $this->orderRepository = $this->objectManager->get(OrderRepositoryInterface::class);
         $this->cartManagement = $this->objectManager->create(CartManagementInterface::class);
     }
 
     /**
-     * @magentoDataFixture Magento/Sales/_files/quote.php
      * @magentoAppIsolation enabled
+     * @magentoDbIsolation enabled
+     * @magentoDataFixture Magento/Sales/_files/quote.php
      */
     public function testAfterSaveOrderCanTriggerEvent()
     {
@@ -61,29 +64,22 @@ class ShopbackValidateTriggerTest extends TestCase
 
         $this->assertEquals(Order::STATE_CANCELED, $order->getState());
 
-        $partner = $order->getExtensionAttributes()->getPartnerTracking();
+        $pendingList = $this->shopbackStackRepository->getPendingItems();
 
-        $topic = "shopback.api";
+        $items = $pendingList->getItems();
+        $total = $pendingList->getTotalCount();
 
-        /** @var Message $message */
-        $message = $this->getTopicLatestMessage($topic);
-        $this->assertEquals(QueueManagement::MESSAGE_STATUS_NEW, $message->getStatus());
+        $item = array_pop($items);
 
-        $messageBody = json_decode($message->getBody(), true);
-
-        $this->assertEquals($partner->getPartner(), $messageBody['partner']);
-        $this->assertEquals($partner->getPartnerParameter(), $messageBody['partner_parameter']);
-        $this->assertEquals($partner->getEntityId(), $messageBody['entity_id']);
-        $this->assertEquals($partner->getOrderId(), $messageBody['order_id']);
-        $this->assertEquals(
-            $partner->getExtensionAttributes()->getAction(),
-            $messageBody['extension_attributes']['action']
-        );
+        $this->assertEquals($order->getEntityId(), $item->getOrderId());
+        $this->assertEquals('validate', $item->getAction());
+        $this->assertEquals('pending', $item->getStatus());
     }
 
     /**
-     * @magentoDataFixture Magento/Sales/_files/quote.php
      * @magentoAppIsolation enabled
+     * @magentoDbIsolation enabled
+     * @magentoDataFixture Magento/Sales/_files/quote.php
      */
     public function testAfterSaveOrderCanNotTriggerEvent()
     {
@@ -99,10 +95,14 @@ class ShopbackValidateTriggerTest extends TestCase
         $order = $this->orderRepository->save($order);
         $this->assertEquals(Order::STATE_COMPLETE, $order->getState());
 
-        $topic = "shopback.api";
-        $messageCollection = $this->_getListMessages($topic);
 
-        $this->assertEquals(0, $messageCollection->getSize());
+        $pendingList = $this->shopbackStackRepository->getPendingItems();
+
+        $items = $pendingList->getItems();
+        $total = $pendingList->getTotalCount();
+
+
+        $this->assertEquals(0, $total);
     }
 
     /**
@@ -165,32 +165,6 @@ class ShopbackValidateTriggerTest extends TestCase
         $orderId = $this->cartManagement->placeOrder($quote->getId());
         $order = $this->orderRepository->get((int)$orderId);
         return $order;
-    }
-
-    /**
-     * @param string $topic
-     * @return Message
-     */
-    private function getTopicLatestMessage(string $topic) : Message
-    {
-        $messageCollection = $this->_getListMessages($topic);
-        $message = $messageCollection->getFirstItem();
-        return $message;
-    }
-
-    private function _getListMessages($topic): MessageCollection
-    {
-        // Assert message status is error
-        $messageCollection = $this->objectManager->create(MessageCollection::class);
-        $messageStatusCollection = $this->objectManager->create(MessageStatusCollection::class);
-
-        $messageCollection->addFilter('topic_name', $topic);
-        $messageCollection->join(
-            ['status' => $messageStatusCollection->getMainTable()],
-            "status.message_id = main_table.id"
-        );
-        $messageCollection->addOrder('message_id', MessageCollection::SORT_ORDER_DESC);
-        return $messageCollection;
     }
 
     protected function _getOrderHasNotCashbaskTrackingObject(CartInterface $quote): OrderInterface
