@@ -3,19 +3,17 @@ declare(strict_types=1);
 
 namespace Tada\Shopback\Api;
 
-use Tada\Shopback\Api\Data\FakeShopbackResponseInterface;
-
 interface FakeShopbackRepositoryInterface
 {
     /**
      * GET - Create Order
-     * @return FakeShopbackResponseInterface
+     * @return \Tada\Shopback\Api\Data\FakeShopbackResponseInterface
      */
     public function createOrder();
 
     /**
      * GET - Validate Order
-     * @return FakeShopbackResponseInterface
+     * @return \Tada\Shopback\Api\Data\FakeShopbackResponseInterface
      */
     public function validateOrder();
 }
