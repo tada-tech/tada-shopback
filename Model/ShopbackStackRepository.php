@@ -74,7 +74,8 @@ class ShopbackStackRepository implements ShopbackStackRepositoryInterface
         CollectionFactory $collectionFactory,
         ShopbackStackSearchResultInterfaceFactory $searchResultFactory,
         SearchCriteriaBuilder $criteriaBuilder
-    ) {
+    )
+    {
         $this->resourceModel = $resourceModel;
         $this->modelFactory = $modelFactory;
         $this->extensionAttributesJoinProcessor = $extensionAttributesJoinProcessor;
@@ -197,7 +198,9 @@ class ShopbackStackRepository implements ShopbackStackRepositoryInterface
      */
     public function addToStackWithAction(int $orderId, string $action)
     {
-        if (!in_array($action, ShopbackStackInterface::ALLOW_ACTION)) {
+        if (!in_array($action, ShopbackStackInterface::ALLOW_ACTION)
+            || $this->resourceModel->isExisted($orderId, $action)
+        ) {
             return false;
         }
 

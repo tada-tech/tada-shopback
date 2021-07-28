@@ -66,6 +66,28 @@ class ShopbackStackRepositoryTest extends TestCase
         $this->assertNull($result->getUpdatedAt());
     }
 
+
+    /**
+     * @magentoDbIsolation enabled
+     * @magentoAppIsolation enabled
+     * @magentoDataFixture Magento/Sales/_files/quote.php
+     */
+    public function testAddToStackWithActionDuplicate()
+    {
+        $orderId = $this->_getOrderId();
+        $itemOne = $this->repository->addToStackWithAction($orderId, 'validate');
+        $itemTwo = $this->repository->addToStackWithAction($orderId, 'validate');
+
+        $this->assertNotFalse($itemOne);
+        $this->assertEquals('pending', $itemOne->getStatus());
+        $this->assertEquals('validate', $itemOne->getAction());
+        $this->assertEquals($orderId, $itemOne->getOrderId());
+        $this->assertNotNull($itemOne->getCreatedAt());
+        $this->assertNull($itemOne->getUpdatedAt());
+
+        $this->assertFalse($itemTwo);
+    }
+
     /**
      * @magentoDbIsolation enabled
      * @magentoAppIsolation enabled
@@ -75,8 +97,11 @@ class ShopbackStackRepositoryTest extends TestCase
     {
         $orderId = $this->_getOrderId();
 
+        $pendingList = $this->repository->getPendingItems();
+
+        $items = $pendingList->getItems();
         /** @var ShopbackStack $stackItem */
-        $stackItem = $this->repository->addToStackWithAction($orderId, 'create');
+        $stackItem = array_pop($items);
 
         $this->assertNotFalse($stackItem);
         $this->assertEquals('pending', $stackItem->getStatus());

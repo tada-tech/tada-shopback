@@ -15,4 +15,23 @@ class ShopbackStack extends AbstractDb
             ShopbackStackInterface::ENTITY_ID
         );
     }
+
+    /**
+     * @param int $orderId
+     * @param string $action
+     * @return int|false
+     * @throws \Magento\Framework\Exception\LocalizedException
+     */
+    public function isExisted(int $orderId, string $action)
+    {
+        $conn = $this->getConnection();
+
+        $select = $conn->select()
+            ->from($this->getMainTable(), ShopbackStackInterface::ENTITY_ID)
+            ->where('order_id = :order_id and action = :action and status = :status');
+
+        $bind = [':order_id' => $orderId, ':action' => $action, ':status' => 'pending'];
+
+        return $conn->fetchOne($select, $bind);
+    }
 }

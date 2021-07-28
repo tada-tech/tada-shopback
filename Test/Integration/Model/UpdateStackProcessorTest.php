@@ -70,7 +70,7 @@ class UpdateStackProcessorTest extends TestCase
 
         $orderId = (int)$this->cartManagement->placeOrder($quote->getId());
 
-        $stackItem = $this->shopbackStackRepository->addToStackWithAction($orderId, 'create');
+        $stackItem = $this->shopbackStackRepository->addToStackWithAction($orderId, 'validate');
 
         $this->assertEquals('pending', $stackItem->getStatus());
 
