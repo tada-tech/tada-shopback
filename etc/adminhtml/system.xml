@@ -21,7 +21,12 @@
                     <label>Cookie timelife</label>
                     <comment>Unit: second. Example: 86400 = (1day), 1800 = (30 minutes), ...</comment>
                 </field>
-                <field id="shopback_status_mapping" translate="label" sortOrder="20" showInDefault="1"
+                <field id="shopback_url" translate="label comment" type="text" sortOrder="20" showInDefault="1"
+                       showInWebsite="0" showInStore="0">
+                    <label>Shopback Url</label>
+                    <comment>Example: https://www.shopback.co.th</comment>
+                </field>
+                <field id="shopback_status_mapping" translate="label" sortOrder="30" showInDefault="1"
                        showInWebsite="0" showInStore="0">
                     <label>Shopback Status Mapping</label>
                     <frontend_model>Tada\Shopback\Block\Adminhtml\Form\Field\StatusMapping</frontend_model>

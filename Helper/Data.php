@@ -13,6 +13,7 @@ use Tada\Shopback\Block\Adminhtml\Form\Field\ShopbackStatus;
 class Data extends AbstractHelper
 {
     const SHOPBACK_GENERAL_COOKIE_TIMELIFE = 'shopback/general/cookie_timelife';
+    const SHOPBACK_GENERAL_SHOPBACK_URL = 'shopback/general/shopback_url';
     const SHOPBACK_GENERAL_SHOPBACK_STATUS_MAPPING = 'shopback/general/shopback_status_mapping';
 
     /**
@@ -39,6 +40,14 @@ class Data extends AbstractHelper
     public function getCookieTimeLife()
     {
         return (int)$this->scopeConfig->getValue(self::SHOPBACK_GENERAL_COOKIE_TIMELIFE);
+    }
+
+    /**
+     * @return string
+     */
+    public function getShopbackUrl()
+    {
+        return $this->scopeConfig->getValue(self::SHOPBACK_GENERAL_SHOPBACK_URL);
     }
 
     /**

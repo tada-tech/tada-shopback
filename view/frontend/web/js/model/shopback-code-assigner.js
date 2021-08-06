@@ -21,7 +21,7 @@ define([
             paymentData['additional_data'] = {};
         }
 
-        if ($.mage.cookies.get('shopback_affiliate_code') !== null) {
+        if ($.mage.cookies.get('shopback_affiliate_code') !== null && $.mage.cookies.get('_med') === 'affiliate') {
             if (typeof paymentData['additional_data'] === 'object' && paymentData['additional_data'] !== null) {
 
                 var partnerModel = JSON.parse($.mage.cookies.get('shopback_affiliate_code'));

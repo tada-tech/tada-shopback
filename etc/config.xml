@@ -5,6 +5,7 @@
         <shopback>
             <general>
                 <cookie_timelife>86400</cookie_timelife>
+                <shopback_url>https://www.shopback.co.th</shopback_url>
                 <shopback_status_mapping>
                     {
                     "_1626752833404_404":{

@@ -34,4 +34,12 @@ class ShopbackTracking extends \Magento\Framework\View\Element\Template
     {
         return $this->configData->getCookieTimeLife();
     }
+
+    /**
+     * @return string
+     */
+    public function getShopbackUrl()
+    {
+        return $this->configData->getShopbackUrl();
+    }
 }
