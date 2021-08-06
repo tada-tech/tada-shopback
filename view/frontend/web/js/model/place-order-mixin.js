@@ -1,8 +1,3 @@
-/**
- * Copyright © Magento, Inc. All rights reserved.
- * See COPYING.txt for license details.
- */
-
 define([
     'jquery',
     'mage/utils/wrapper',
@@ -12,10 +7,15 @@ define([
 
     return function (placeOrderAction) {
 
-        /** Override default place order action and add agreement_ids to request */
+        /** Override default place order action and add shopBack params to request */
         return wrapper.wrap(placeOrderAction, function (originalAction, paymentData, messageContainer) {
-            shopbackCodeAssigner(paymentData);
-            return originalAction(paymentData, messageContainer);
+            shopbackCodeAssigner.setData(paymentData);
+
+            var result = originalAction(paymentData, messageContainer);
+
+            shopbackCodeAssigner.clearShopBackCookie();
+
+            return result;
         });
     };
 });
