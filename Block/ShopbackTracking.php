@@ -42,4 +42,12 @@ class ShopbackTracking extends \Magento\Framework\View\Element\Template
     {
         return $this->configData->getShopbackUrl();
     }
+
+    /**
+     * @return string
+     */
+    public function getTransactionParameter()
+    {
+        return $this->configData->getShopbackTransactionParameter();
+    }
 }

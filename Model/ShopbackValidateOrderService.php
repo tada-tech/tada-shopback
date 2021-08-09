@@ -61,13 +61,13 @@ class ShopbackValidateOrderService implements ShopbackValidateOrderInterface
     {
         $params = [
             'query' => [
-                'offer_id' => 142, //OFFER_ID SHOPBACK ISSUED,
-                'aff_id' => 345, // aff_id SHOPBACK ISS
+                'offer_id' => $this->configData->getShopbackOfferId(), //offer_id -> SHOPBACK ISSUED,
+                'aff_id' => $this->configData->getShopbackAffiliateId(), // aff_id -> SHOPBACK ISSUED
                 'amount' => $order->getGrandTotal(),
                 'adv_sub' => $order->getEntityId(),
                 'adv_sub5' => $order->getOrderCurrencyCode(),
                 'status' => $this->configData->getShopbackStatusByOrderState($order->getState()),
-                'security_token' => "MERCHANT TOKEN ISSUED"
+                'security_token' => $this->configData->getShopbackSecurityToken() //security_token -> SHOPBACK ISSUED
             ],
             RequestOptions::ON_STATS => function (TransferStats $stats) use (&$fullRequestUrl) {
                 $fullRequestUrl = $stats->getEffectiveUri();

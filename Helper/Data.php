@@ -14,7 +14,11 @@ class Data extends AbstractHelper
 {
     const SHOPBACK_GENERAL_COOKIE_TIMELIFE = 'shopback/general/cookie_timelife';
     const SHOPBACK_GENERAL_SHOPBACK_URL = 'shopback/general/shopback_url';
+    const SHOPBACK_GENERAL_SHOPBACK_TRANSACTION_PARAMETER = 'shopback/general/shopback_transaction_parameter';
     const SHOPBACK_GENERAL_SHOPBACK_STATUS_MAPPING = 'shopback/general/shopback_status_mapping';
+    const SHOPBACK_GENERAL_SHOPBACK_OFFER_ID = 'shopback/general/shopback_offer_id';
+    const SHOPBACK_GENERAL_SHOPBACK_AFFILIATE_ID = 'shopback/general/shopback_affiliate_id';
+    const SHOPBACK_GENERAL_SHOPBACK_SECURITY_TOKEN = 'shopback/general/shopback_security_token';
 
     /**
      * @var SerializerInterface
@@ -48,6 +52,38 @@ class Data extends AbstractHelper
     public function getShopbackUrl()
     {
         return $this->scopeConfig->getValue(self::SHOPBACK_GENERAL_SHOPBACK_URL);
+    }
+
+    /**
+     * @return string
+     */
+    public function getShopbackTransactionParameter()
+    {
+        return $this->scopeConfig->getValue(self::SHOPBACK_GENERAL_SHOPBACK_TRANSACTION_PARAMETER);
+    }
+
+    /**
+     * @return string
+     */
+    public function getShopbackOfferId()
+    {
+        return $this->scopeConfig->getValue(self::SHOPBACK_GENERAL_SHOPBACK_OFFER_ID);
+    }
+
+    /**
+     * @return string
+     */
+    public function getShopbackAffiliateId()
+    {
+        return $this->scopeConfig->getValue(self::SHOPBACK_GENERAL_SHOPBACK_AFFILIATE_ID);
+    }
+
+    /**
+     * @return string
+     */
+    public function getShopbackSecurityToken()
+    {
+        return $this->scopeConfig->getValue(self::SHOPBACK_GENERAL_SHOPBACK_SECURITY_TOKEN);
     }
 
     /**
