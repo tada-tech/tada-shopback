@@ -1,0 +1,60 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
+    <system>
+        <tab id="shopback_integration" translate="label" sortOrder="100">
+            <label>Shopback Integration</label>
+        </tab>
+        <section id="shopback" translate="label" type="text" sortOrder="1000" showInDefault="1"
+                 showInWebsite="0"
+                 showInStore="0">
+            <class>separator-top</class>
+            <label>ShopBack Integration</label>
+            <tab>shopback_integration</tab>
+            <resource>Tada_Shopback::configuration</resource>
+            <group id="general" translate="label" type="text" sortOrder="1000" showInDefault="1"
+                   showInWebsite="0"
+                   showInStore="0">
+                <label>General Settings</label>
+                <field id="cookie_timelife" translate="label comment" type="text" sortOrder="10" showInDefault="1"
+                       showInWebsite="0" showInStore="0">
+                    <label>Cookie timelife</label>
+                    <comment>Unit: second. Example: 86400 = (1day), 1800 = (30 minutes), ...</comment>
+                </field>
+                <field id="shopback_url" translate="label comment" type="text" sortOrder="20" showInDefault="1"
+                       showInWebsite="0" showInStore="0">
+                    <label>Shopback Url</label>
+                    <comment>Example: https://www.shopback.co.th</comment>
+                </field>
+                <field id="shopback_transaction_parameter" translate="label comment" type="text" sortOrder="30" showInDefault="1"
+                       showInWebsite="0" showInStore="0">
+                    <label>Shopback Transaction Parameter</label>
+                    <comment>Default: transaction_id</comment>
+                </field>
+                <field id="shopback_offer_id" translate="label comment" type="text" sortOrder="40" showInDefault="1"
+                       showInWebsite="0" showInStore="0">
+                    <label>Shopback offer_id</label>
+                    <comment>offer_id is issued by ShopBack</comment>
+                </field>
+                <field id="shopback_affiliate_id" translate="label comment" type="text" sortOrder="50" showInDefault="1"
+                       showInWebsite="0" showInStore="0">
+                    <label>Shopback aff_id</label>
+                    <comment>aff_id is issued by ShopBack</comment>
+                </field>
+                <field id="shopback_security_token" translate="label comment" type="text" sortOrder="60" showInDefault="1"
+                       showInWebsite="0" showInStore="0">
+                    <label>Shopback security_token</label>
+                    <comment>security_token is issued by ShopBack</comment>
+                </field>
+                <field id="shopback_status_mapping" translate="label" sortOrder="70" showInDefault="1"
+                       showInWebsite="0" showInStore="0">
+                    <label>Shopback Status Mapping</label>
+                    <frontend_model>Tada\Shopback\Block\Adminhtml\Form\Field\StatusMapping</frontend_model>
+                    <backend_model>Magento\Config\Model\Config\Backend\Serialized\ArraySerialized</backend_model>
+                </field>
+            </group>
+        </section>
+    </system>
+</config>
+
+

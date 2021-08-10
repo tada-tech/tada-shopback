@@ -1,0 +1,24 @@
+{
+    "name": "tada/shopback",
+    "description": "Shopback integration",
+    "authors": [
+        {
+            "name": "Nghia Dang",
+            "email": "nghia.dang@tada-tech.co"
+        }
+    ],
+    "require": {},
+    "type": "magento2-module",
+    "version": "1.0.0",
+    "license": [
+
+    ],
+    "autoload": {
+        "files": [
+            "registration.php"
+        ],
+        "psr-4": {
+            "Tada\\Shopback\\": ""
+        }
+    }
+}

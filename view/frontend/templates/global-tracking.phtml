@@ -1,0 +1,16 @@
+<?php
+declare(strict_types=1);
+/** @var $block \Tada\Shopback\Block\ShopbackTracking */
+?>
+<script type="text/x-magento-init">
+    {
+        "*": {
+            "Tada_Shopback/global-tracking":
+            {
+                "cookieTTL" : <?= $block->escapeJs($block->getCookieTTL()); ?>,
+                "shopbackUrl": "<?= $block->escapeJs($block->getShopbackUrl()); ?>",
+                "shopbackTransactionParameter": "<?= $block->escapeJs($block->getTransactionParameter()); ?>"
+            }
+        }
+    }
+</script>

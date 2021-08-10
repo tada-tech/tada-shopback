@@ -1,0 +1,54 @@
+<?xml version="1.0"?>
+<schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Setup/Declaration/Schema/etc/schema.xsd">
+    <table name="tada_shopback_stack"
+           resource="default"
+           engine="innodb">
+        <!-- primary key -->
+        <column xsi:type="int"
+                name="entity_id"
+                padding="10"
+                unsigned="true"
+                nullable="false"
+                identity="true"
+                comment=""/>
+
+        <column xsi:type="int"
+                name="order_id"
+                padding="10"
+                unsigned="true"
+                nullable="false"
+                identity="false"
+                comment=""/>
+
+
+        <column xsi:type="varchar"
+                name="action"
+                nullable="false"
+                length="255"
+                comment="Action Name"/>
+
+        <column xsi:type="varchar"
+                name="status"
+                nullable="false"
+                length="255"
+                comment="Status of Action: Pending Or Done"/>
+
+        <column xsi:type="timestamp" name="created_at" on_update="false" nullable="false" default="CURRENT_TIMESTAMP"
+                comment="Created At"/>
+        <column xsi:type="timestamp" name="updated_at" on_update="true" nullable="false" default="CURRENT_TIMESTAMP"
+                comment="Updated At"/>
+
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="entity_id"/>
+        </constraint>
+
+        <constraint xsi:type="foreign"
+                    referenceId="TADA_SHOPBACK_STACK_ORDER_ID_SALES_ORDER_ENTITY_ID"
+                    table="tada_shopback_stack"
+                    column="order_id"
+                    referenceTable="sales_order"
+                    referenceColumn="entity_id"
+                    onDelete="CASCADE"/>
+    </table>
+</schema>
