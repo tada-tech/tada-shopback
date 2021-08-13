@@ -8,8 +8,12 @@ use Magento\Quote\Api\CartManagementInterface;
 use Magento\Quote\Api\CartRepositoryInterface;
 use Magento\Quote\Model\Quote;
 use Magento\Quote\Model\Quote\Address\Rate;
+use Magento\Sales\Api\Data\OrderInterface;
+use Magento\Sales\Api\Data\OrderItemInterface;
+use Magento\Sales\Api\OrderRepositoryInterface;
 use Magento\TestFramework\Helper\Bootstrap;
 use PHPUnit\Framework\TestCase;
+use Tada\Shopback\Api\Data\ShopbackStackInterface;
 use Tada\Shopback\Api\Data\ShopbackStackSearchResultInterface;
 use Tada\Shopback\Api\ShopbackStackRepositoryInterface;
 use Tada\Shopback\Model\ShopbackStack;
@@ -26,13 +30,28 @@ class ShopbackStackRepositoryTest extends TestCase
      */
     protected $repository;
 
+    /**
+     * @var CartManagementInterface
+     */
     protected $cartManagement;
+
+    /**
+     * @var OrderRepositoryInterface
+     */
+    protected $orderRepository;
 
     protected function setUp()
     {
         $this->objectManager = Bootstrap::getObjectManager();
         $this->cartManagement = $this->objectManager->create(CartManagementInterface::class);
         $this->repository = $this->objectManager->get(ShopbackStackRepositoryInterface::class);
+        $this->orderRepository = $this->objectManager->get(OrderRepositoryInterface::class);
+    }
+
+    protected function tearDown()
+    {
+        parent::tearDown();
+        $this->deleteStacks();
     }
 
     /**
@@ -42,12 +61,12 @@ class ShopbackStackRepositoryTest extends TestCase
      */
     public function testGetPendingItems()
     {
-        $orderId = $this->_getOrderId();
+        list($orderItems, $total) = $this->createStacks();
+
         /** @var ShopbackStackSearchResultInterface $result */
         $result = $this->repository->getPendingItems();
-        $this->assertEquals(1, $result->getTotalCount());
+        $this->assertEquals($total, $result->getTotalCount());
     }
-
 
     /**
      * @magentoDbIsolation enabled
@@ -56,16 +75,18 @@ class ShopbackStackRepositoryTest extends TestCase
      */
     public function testAddToStackWithAction()
     {
-        $orderId = $this->_getOrderId();
-        $result = $this->repository->addToStackWithAction($orderId, 'validate');
-        $this->assertNotFalse($result);
-        $this->assertEquals('pending', $result->getStatus());
-        $this->assertEquals('validate', $result->getAction());
-        $this->assertEquals($orderId, $result->getOrderId());
-        $this->assertNotNull($result->getCreatedAt());
-        $this->assertNull($result->getUpdatedAt());
-    }
+        list($orderItems, $total) = $this->createStacks('validate');
 
+        /** @var OrderItemInterface $result */
+        $result = $orderItems[0];
+        $pendingItems = $this->repository->getPendingItems()->getItems();
+
+        $pendingItem = array_pop($pendingItems);
+
+        $this->assertEquals($pendingItem->getOrderItemId(), $result->getItemId());
+        $this->assertEquals('validate', $pendingItem->getAction());
+        $this->assertEquals('pending', $pendingItem->getStatus());
+    }
 
     /**
      * @magentoDbIsolation enabled
@@ -74,14 +95,18 @@ class ShopbackStackRepositoryTest extends TestCase
      */
     public function testAddToStackWithActionDuplicate()
     {
-        $orderId = $this->_getOrderId();
-        $itemOne = $this->repository->addToStackWithAction($orderId, 'validate');
-        $itemTwo = $this->repository->addToStackWithAction($orderId, 'validate');
+        list($orderItems, $total) = $this->createStacks();
+        /** @var OrderItemInterface $orderItem */
+        $orderItem = $orderItems[0];
+
+        $orderItemId = (int)$orderItem->getItemId();
+        $itemOne = $this->repository->addToStackWithAction($orderItemId, 'validate');
+        $itemTwo = $this->repository->addToStackWithAction($orderItemId, 'validate');
 
         $this->assertNotFalse($itemOne);
         $this->assertEquals('pending', $itemOne->getStatus());
         $this->assertEquals('validate', $itemOne->getAction());
-        $this->assertEquals($orderId, $itemOne->getOrderId());
+        $this->assertEquals($orderItemId, $itemOne->getOrderItemId());
         $this->assertNotNull($itemOne->getCreatedAt());
         $this->assertNull($itemOne->getUpdatedAt());
 
@@ -95,7 +120,7 @@ class ShopbackStackRepositoryTest extends TestCase
      */
     public function testMakeDone()
     {
-        $orderId = $this->_getOrderId();
+        list($orderItems, $total) = $this->createStacks();
 
         $pendingList = $this->repository->getPendingItems();
 
@@ -120,7 +145,6 @@ class ShopbackStackRepositoryTest extends TestCase
         $orderId = $this->cartManagement->placeOrder($quote->getId());
         return (int)$orderId;
     }
-
 
     /**
      * Gets quote by reserved order ID.
@@ -174,5 +198,29 @@ class ShopbackStackRepositoryTest extends TestCase
         $quoteRepository->save($quote);
 
         return $quote;
+    }
+
+    private function createStacks($action = 'create')
+    {
+        $orderId = $this->_getOrderId();
+        /** @var OrderInterface $order */
+        $order = $this->orderRepository->get($orderId);
+
+        $orderItems = $order->getItems();
+        $totalItems = $order->getTotalItemCount();
+        foreach ($orderItems as $item) {
+            $itemId = (int)$item->getItemId();
+            $this->repository->addToStackWithAction($itemId, $action);
+        }
+        return [$orderItems, $totalItems];
+    }
+
+    private function deleteStacks()
+    {
+        $list = $this->repository->getPendingItems();
+        /** @var ShopbackStackInterface $item */
+        foreach ($list->getItems() as $item) {
+            $this->repository->delete($item);
+        }
     }
 }

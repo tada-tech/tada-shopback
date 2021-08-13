@@ -29,28 +29,44 @@
                 <field id="shopback_transaction_parameter" translate="label comment" type="text" sortOrder="30" showInDefault="1"
                        showInWebsite="0" showInStore="0">
                     <label>Shopback Transaction Parameter</label>
-                    <comment>Default: transaction_id</comment>
+                    <comment>Default: shopback_id</comment>
                 </field>
-                <field id="shopback_offer_id" translate="label comment" type="text" sortOrder="40" showInDefault="1"
+                <field id="shopback_create_offer_id" translate="label comment" type="text" sortOrder="40" showInDefault="1"
                        showInWebsite="0" showInStore="0">
-                    <label>Shopback offer_id</label>
+                    <label>Shopback Create API offer_id</label>
                     <comment>offer_id is issued by ShopBack</comment>
                 </field>
-                <field id="shopback_affiliate_id" translate="label comment" type="text" sortOrder="50" showInDefault="1"
+                <field id="shopback_create_affiliate_id" translate="label comment" type="text" sortOrder="50" showInDefault="1"
                        showInWebsite="0" showInStore="0">
-                    <label>Shopback aff_id</label>
+                    <label>Shopback Create API aff_id</label>
                     <comment>aff_id is issued by ShopBack</comment>
                 </field>
-                <field id="shopback_security_token" translate="label comment" type="text" sortOrder="60" showInDefault="1"
+                <field id="shopback_validate_offer_id" translate="label comment" type="text" sortOrder="60" showInDefault="1"
+                       showInWebsite="0" showInStore="0">
+                    <label>Shopback Validate API offer_id</label>
+                    <comment>offer_id is issued by ShopBack</comment>
+                </field>
+                <field id="shopback_validate_affiliate_id" translate="label comment" type="text" sortOrder="70" showInDefault="1"
+                       showInWebsite="0" showInStore="0">
+                    <label>Shopback Validate API aff_id</label>
+                    <comment>aff_id is issued by ShopBack</comment>
+                </field>
+                <field id="shopback_security_token" translate="label comment" type="text" sortOrder="80" showInDefault="1"
                        showInWebsite="0" showInStore="0">
                     <label>Shopback security_token</label>
                     <comment>security_token is issued by ShopBack</comment>
                 </field>
-                <field id="shopback_status_mapping" translate="label" sortOrder="70" showInDefault="1"
+                <field id="shopback_status_mapping" translate="label" sortOrder="90" showInDefault="1"
                        showInWebsite="0" showInStore="0">
                     <label>Shopback Status Mapping</label>
                     <frontend_model>Tada\Shopback\Block\Adminhtml\Form\Field\StatusMapping</frontend_model>
                     <backend_model>Magento\Config\Model\Config\Backend\Serialized\ArraySerialized</backend_model>
+                </field>
+                <field id="testing_enabled" translate="label comment" type="select" sortOrder="100" showInDefault="1"
+                       showInWebsite="0" showInStore="0">
+                    <label>Enable To Simulate Redirect Flow</label>
+                    <comment>Access url : http://your_domain/tada_shopback/simulator</comment>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                 </field>
             </group>
         </section>

@@ -6,6 +6,7 @@ namespace Tada\Shopback\Helper;
 use Magento\Framework\App\Helper\AbstractHelper;
 use Magento\Framework\App\Helper\Context;
 use Magento\Framework\Serialize\SerializerInterface;
+use Magento\Sales\Api\Data\OrderItemInterface;
 use Magento\Store\Model\ScopeInterface;
 use Tada\Shopback\Block\Adminhtml\Form\Field\OrderStatus;
 use Tada\Shopback\Block\Adminhtml\Form\Field\ShopbackStatus;
@@ -16,9 +17,12 @@ class Data extends AbstractHelper
     const SHOPBACK_GENERAL_SHOPBACK_URL = 'shopback/general/shopback_url';
     const SHOPBACK_GENERAL_SHOPBACK_TRANSACTION_PARAMETER = 'shopback/general/shopback_transaction_parameter';
     const SHOPBACK_GENERAL_SHOPBACK_STATUS_MAPPING = 'shopback/general/shopback_status_mapping';
-    const SHOPBACK_GENERAL_SHOPBACK_OFFER_ID = 'shopback/general/shopback_offer_id';
-    const SHOPBACK_GENERAL_SHOPBACK_AFFILIATE_ID = 'shopback/general/shopback_affiliate_id';
+    const SHOPBACK_GENERAL_SHOPBACK_CREATE_OFFER_ID = 'shopback/general/shopback_create_offer_id';
+    const SHOPBACK_GENERAL_SHOPBACK_CREATE_AFFILIATE_ID = 'shopback/general/shopback_create_affiliate_id';
+    const SHOPBACK_GENERAL_SHOPBACK_VALIDATE_OFFER_ID = 'shopback/general/shopback_validate_offer_id';
+    const SHOPBACK_GENERAL_SHOPBACK_VALIDATE_AFFILIATE_ID = 'shopback/general/shopback_validate_affiliate_id';
     const SHOPBACK_GENERAL_SHOPBACK_SECURITY_TOKEN = 'shopback/general/shopback_security_token';
+    const SHOPBACK_GENERAL_SHOPBACK_TESTING_ENABLED = 'shopback/general/testing_enabled';
 
     /**
      * @var SerializerInterface
@@ -65,17 +69,33 @@ class Data extends AbstractHelper
     /**
      * @return string
      */
-    public function getShopbackOfferId()
+    public function getCreateShopbackOfferId()
     {
-        return $this->scopeConfig->getValue(self::SHOPBACK_GENERAL_SHOPBACK_OFFER_ID);
+        return $this->scopeConfig->getValue(self::SHOPBACK_GENERAL_SHOPBACK_CREATE_OFFER_ID);
     }
 
     /**
      * @return string
      */
-    public function getShopbackAffiliateId()
+    public function getCreateShopbackAffiliateId()
     {
-        return $this->scopeConfig->getValue(self::SHOPBACK_GENERAL_SHOPBACK_AFFILIATE_ID);
+        return $this->scopeConfig->getValue(self::SHOPBACK_GENERAL_SHOPBACK_CREATE_AFFILIATE_ID);
+    }
+
+    /**
+     * @return string
+     */
+    public function getValidateShopbackOfferId()
+    {
+        return $this->scopeConfig->getValue(self::SHOPBACK_GENERAL_SHOPBACK_VALIDATE_OFFER_ID);
+    }
+
+    /**
+     * @return string
+     */
+    public function getValidateShopbackAffiliateId()
+    {
+        return $this->scopeConfig->getValue(self::SHOPBACK_GENERAL_SHOPBACK_VALIDATE_AFFILIATE_ID);
     }
 
     /**
@@ -147,5 +167,22 @@ class Data extends AbstractHelper
         }
 
         return $result;
+    }
+
+    /**
+     * @param OrderItemInterface $orderItem
+     * @return string
+     */
+    public function toAdvSub(OrderItemInterface $orderItem): string
+    {
+        return 'ORD' . $orderItem->getOrderId() . '_' . $orderItem->getSku();
+    }
+
+    /**
+     * @return bool
+     */
+    public function getTestingEnabled()
+    {
+        return (bool)$this->scopeConfig->getValue(self::SHOPBACK_GENERAL_SHOPBACK_TESTING_ENABLED);
     }
 }

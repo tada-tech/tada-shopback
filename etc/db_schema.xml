@@ -14,13 +14,12 @@
                 comment=""/>
 
         <column xsi:type="int"
-                name="order_id"
+                name="order_item_id"
                 padding="10"
                 unsigned="true"
                 nullable="false"
                 identity="false"
-                comment=""/>
-
+                comment="Order Item Id"/>
 
         <column xsi:type="varchar"
                 name="action"
@@ -36,6 +35,7 @@
 
         <column xsi:type="timestamp" name="created_at" on_update="false" nullable="false" default="CURRENT_TIMESTAMP"
                 comment="Created At"/>
+
         <column xsi:type="timestamp" name="updated_at" on_update="true" nullable="false" default="CURRENT_TIMESTAMP"
                 comment="Updated At"/>
 
@@ -44,11 +44,11 @@
         </constraint>
 
         <constraint xsi:type="foreign"
-                    referenceId="TADA_SHOPBACK_STACK_ORDER_ID_SALES_ORDER_ENTITY_ID"
+                    referenceId="TADA_SHOPBACK_STACK_ORDER_ITEM_ID_SALES_ORDER_ITEM_ITEM_ID"
                     table="tada_shopback_stack"
-                    column="order_id"
-                    referenceTable="sales_order"
-                    referenceColumn="entity_id"
+                    column="order_item_id"
+                    referenceTable="sales_order_item"
+                    referenceColumn="item_id"
                     onDelete="CASCADE"/>
     </table>
 </schema>

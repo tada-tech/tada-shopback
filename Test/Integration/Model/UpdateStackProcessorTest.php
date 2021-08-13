@@ -3,14 +3,18 @@ declare(strict_types=1);
 
 namespace Tada\Shopback\Test\Integration;
 
+use GuzzleHttp\Psr7\ResponseFactory;
 use Magento\Framework\Api\SearchCriteriaBuilder;
 use Magento\Quote\Api\CartManagementInterface;
 use Magento\Quote\Api\CartRepositoryInterface;
 use Magento\Quote\Model\Quote;
 use Magento\Quote\Model\Quote\Address\Rate;
+use Magento\Sales\Api\Data\OrderInterface;
+use Magento\Sales\Api\OrderItemRepositoryInterface;
 use Magento\Sales\Api\OrderRepositoryInterface;
 use Magento\TestFramework\Helper\Bootstrap;
 use PHPUnit\Framework\TestCase;
+use Tada\Shopback\Api\Data\ShopbackStackInterface;
 use Tada\Shopback\Api\ShopbackStackRepositoryInterface;
 use Tada\Shopback\Model\UpdateStackProcessor;
 
@@ -32,11 +36,29 @@ class UpdateStackProcessorTest extends TestCase
     protected $orderRepository;
 
     /**
+     * @var OrderItemRepositoryInterface
+     */
+    protected $orderItemRepository;
+
+    /**
      * @var UpdateStackProcessor
      */
     protected $updateStackProcessor;
 
+    /**
+     * @var CartManagementInterface
+     */
     protected $cartManagement;
+
+    /**
+     * @var array
+     */
+    protected $servicePool = [];
+
+    /**
+     * @var ResponseFactory
+     */
+    protected $responseFactory;
 
     protected function setUp()
     {
@@ -44,18 +66,26 @@ class UpdateStackProcessorTest extends TestCase
         $this->cartManagement = $this->objectManager->create(CartManagementInterface::class);
         $this->shopbackStackRepository = $this->objectManager->create(ShopbackStackRepositoryInterface::class);
         $this->orderRepository = $this->objectManager->create(OrderRepositoryInterface::class);
+        $this->orderItemRepository = $this->objectManager->create(OrderItemRepositoryInterface::class);
 
-        $servicePool = [];
-        $servicePool['create'] = $this->objectManager
+        $this->servicePool['create'] = $this->objectManager
             ->create(\Tada\Shopback\Api\ShopbackCreateOrderInterface::class);
-        $servicePool['validate'] = $this->objectManager
+        $this->servicePool['validate'] = $this->objectManager
             ->create(\Tada\Shopback\Api\ShopbackValidateOrderInterface::class);
+
+        $this->responseFactory = $this->objectManager->create(ResponseFactory::class);
 
         $this->updateStackProcessor = new UpdateStackProcessor(
             $this->shopbackStackRepository,
-            $this->orderRepository,
-            $servicePool
+            $this->orderItemRepository,
+            $this->servicePool
         );
+    }
+
+    protected function tearDown()
+    {
+        parent::tearDown();
+        $this->deleteStacks();
     }
 
     /**
@@ -65,17 +95,31 @@ class UpdateStackProcessorTest extends TestCase
      */
     public function testExecute()
     {
-        $quote = $this->_getQuote('test01');
-        $quote = $this->_prepareQuote($quote);
+        list($orderItems, $total) = $this->createStacks();
 
-        $orderId = (int)$this->cartManagement->placeOrder($quote->getId());
+        $pendingList = $this->shopbackStackRepository->getPendingItems();
 
-        $stackItem = $this->shopbackStackRepository->addToStackWithAction($orderId, 'validate');
+        // fake success response
+        /** @var  $response */
+        $response = $this->responseFactory->create(
+            [
+                'status' => 200,
+                'body' => 'success=true;'
+            ]
+        );
 
-        $this->assertEquals('pending', $stackItem->getStatus());
+        foreach ($pendingList->getItems() as $item) {
+            $action = $item->getAction();
+            if ($this->servicePool[$action]->isSkip($item)) {
+                continue;
+            }
 
-        //Execute Cron
-        $this->updateStackProcessor->execute();
+            $this->servicePool[$action]->beforeExecute($item);
+
+            //Fake Execute => $response
+
+            $this->servicePool[$action]->afterExecute($response, $item);
+        }
 
         $pendingList = $this->shopbackStackRepository->getPendingItems();
 
@@ -134,5 +178,38 @@ class UpdateStackProcessorTest extends TestCase
         $quoteRepository->save($quote);
 
         return $quote;
+    }
+
+    private function _getOrderId()
+    {
+        $quote = $this->_getQuote('test01');
+        $quote = $this->_prepareQuote($quote);
+
+        $orderId = $this->cartManagement->placeOrder($quote->getId());
+        return (int)$orderId;
+    }
+
+    private function createStacks($action = 'create')
+    {
+        $orderId = $this->_getOrderId();
+        /** @var OrderInterface $order */
+        $order = $this->orderRepository->get($orderId);
+
+        $orderItems = $order->getItems();
+        $totalItems = $order->getTotalItemCount();
+        foreach ($orderItems as $item) {
+            $itemId = (int)$item->getItemId();
+            $this->shopbackStackRepository->addToStackWithAction($itemId, $action);
+        }
+        return [$orderItems, $totalItems];
+    }
+
+    private function deleteStacks()
+    {
+        $list = $this->shopbackStackRepository->getPendingItems();
+        /** @var ShopbackStackInterface $item */
+        foreach ($list->getItems() as $item) {
+            $this->shopbackStackRepository->delete($item);
+        }
     }
 }

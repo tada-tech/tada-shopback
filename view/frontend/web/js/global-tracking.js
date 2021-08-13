@@ -7,7 +7,7 @@ define([
     return function (config, element) {
         var cookieTTL = config.cookieTTL || 86400; // 1 day of lifetime as default
         var shopbackUrl = config.shopbackUrl;
-        var shopbackTransactionParameter = config.shopbackTransactionParameter || 'transaction_id';
+        var shopbackTransactionParameter = config.shopbackTransactionParameter || 'shopback_id';
 
         var COOKIE_NAME = "shopback_affiliate_code";
         var REF_FLAG = '_med';
@@ -29,10 +29,11 @@ define([
 
         var urlParamsObject = new URLSearchParams(window.location.search);
 
+        var partner = urlParamsObject.get('partner');
         var partner_parameter = urlParamsObject.get(shopbackTransactionParameter);
 
         if (partner_parameter) {
-            var cookieValue = createCookieValue(partner_parameter);
+            var cookieValue = createCookieValue(partner_parameter, partner);
             $.mage.cookies.set(COOKIE_NAME, JSON.stringify(cookieValue), options);
         }
 

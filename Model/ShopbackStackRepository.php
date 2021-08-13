@@ -67,15 +67,14 @@ class ShopbackStackRepository implements ShopbackStackRepositoryInterface
      * @param SearchCriteriaBuilder $criteriaBuilder
      */
     public function __construct(
-        ResourceModel $resourceModel,
-        ModelFactory $modelFactory,
-        JoinProcessorInterface $extensionAttributesJoinProcessor,
-        CollectionProcessorInterface $collectionProcessor,
-        CollectionFactory $collectionFactory,
+        ResourceModel                             $resourceModel,
+        ModelFactory                              $modelFactory,
+        JoinProcessorInterface                    $extensionAttributesJoinProcessor,
+        CollectionProcessorInterface              $collectionProcessor,
+        CollectionFactory                         $collectionFactory,
         ShopbackStackSearchResultInterfaceFactory $searchResultFactory,
-        SearchCriteriaBuilder $criteriaBuilder
-    )
-    {
+        SearchCriteriaBuilder                     $criteriaBuilder
+    ) {
         $this->resourceModel = $resourceModel;
         $this->modelFactory = $modelFactory;
         $this->extensionAttributesJoinProcessor = $extensionAttributesJoinProcessor;
@@ -191,21 +190,19 @@ class ShopbackStackRepository implements ShopbackStackRepositoryInterface
     }
 
     /**
-     * @param int $orderId
+     * @param int $orderItemId
      * @param string $action
      * @return false|ShopbackStackInterface
      * @throws CouldNotSaveException
      */
-    public function addToStackWithAction(int $orderId, string $action)
+    public function addToStackWithAction(int $orderItemId, string $action)
     {
-        if (!in_array($action, ShopbackStackInterface::ALLOW_ACTION)
-            || $this->resourceModel->isExisted($orderId, $action)
-        ) {
+        if ($this->resourceModel->isExisted($orderItemId, $action)) {
             return false;
         }
 
         $model = $this->modelFactory->create();
-        $model->setOrderId($orderId);
+        $model->setOrderItemId($orderItemId);
         $model->setAction($action);
         $model->setStatus('pending');
 
@@ -221,5 +218,15 @@ class ShopbackStackRepository implements ShopbackStackRepositoryInterface
     {
         $object->setStatus('done');
         return $this->save($object);
+    }
+
+    /**
+     * @param int $orderItemId
+     * @return bool
+     * @throws \Magento\Framework\Exception\LocalizedException
+     */
+    public function isCreateActionDone(int $orderItemId)
+    {
+        return (bool)$this->resourceModel->isStatusDone($orderItemId);
     }
 }

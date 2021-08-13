@@ -10,6 +10,7 @@ use Magento\Quote\Model\Quote;
 use Magento\Quote\Model\Quote\Address\Rate;
 use Magento\Sales\Api\OrderRepositoryInterface;
 use Magento\Sales\Model\Order;
+use Magento\Setup\Model\ThemeDependencyCheckerFactory;
 use Magento\TestFramework\Helper\Bootstrap;
 use PHPUnit\Framework\TestCase;
 use Magento\Sales\Api\Data\OrderInterface;
@@ -64,16 +65,9 @@ class ShopbackValidateTriggerTest extends TestCase
 
         $this->assertEquals(Order::STATE_CANCELED, $order->getState());
 
-        $pendingList = $this->shopbackStackRepository->getPendingItems();
+        $cashbackEntity = $order->getExtensionAttributes()->getPartnerTracking();
 
-        $items = $pendingList->getItems();
-        $total = $pendingList->getTotalCount();
-
-        $item = array_pop($items);
-
-        $this->assertEquals($order->getEntityId(), $item->getOrderId());
-        $this->assertEquals('validate', $item->getAction());
-        $this->assertEquals('pending', $item->getStatus());
+        $this->assertNotEmpty($cashbackEntity->getExtensionAttributes()->getAction());
     }
 
     /**
@@ -87,7 +81,6 @@ class ShopbackValidateTriggerTest extends TestCase
         /** @var OrderInterface $order */
         $order = $this->_getOrderHasNotCashbaskTrackingObject($quote);
 
-        $partner = $order->getExtensionAttributes()->getPartnerTracking();
         $this->assertEquals(Order::STATE_NEW, $order->getState());
 
         $order->setState(Order::STATE_COMPLETE);
@@ -95,14 +88,7 @@ class ShopbackValidateTriggerTest extends TestCase
         $order = $this->orderRepository->save($order);
         $this->assertEquals(Order::STATE_COMPLETE, $order->getState());
 
-
-        $pendingList = $this->shopbackStackRepository->getPendingItems();
-
-        $items = $pendingList->getItems();
-        $total = $pendingList->getTotalCount();
-
-
-        $this->assertEquals(0, $total);
+        $this->assertEmpty($order->getExtensionAttributes()->getPartnerTracking());
     }
 
     /**
@@ -184,7 +170,6 @@ class ShopbackValidateTriggerTest extends TestCase
         $quoteRepository = $this->objectManager
             ->get(\Magento\Quote\Api\CartRepositoryInterface::class);
         $quoteRepository->save($quote);
-
 
         $orderId = $this->cartManagement->placeOrder($quote->getId());
         $order = $this->orderRepository->get((int)$orderId);

@@ -37,4 +37,12 @@ interface ShopbackStackRepositoryInterface
      * @throws \Exception
      */
     public function delete(ShopbackStackInterface $object): ShopbackStackInterface;
+
+    /**
+     * @param int $orderItemId
+     * @param string $action
+     * @return false|ShopbackStackInterface
+     * @throws CouldNotSaveException
+     */
+    public function addToStackWithAction(int $orderItemId, string $action);
 }

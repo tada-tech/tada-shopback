@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<csp_whitelist xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+               xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Csp:etc/csp_whitelist.xsd">
+    <policies>
+        <policy id="connect-src">
+            <values>
+                <value id="shopback_go2cloud" type="host">shopback.go2cloud.org</value>
+                <value id="petnme_co_th" type="host">www.petnme.co.th</value>
+            </values>
+        </policy>
+    </policies>
+</csp_whitelist>

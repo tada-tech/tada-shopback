@@ -1,0 +1,9 @@
+<?php
+/**
+ * @var \Tada\Shopback\Block\Simulator $block
+ */
+$merchantUrl = $block->getMerchantUrl();
+?>
+<h4>The following link is design for testing redirect flow like Shopback: </h4>
+<a href="<?= $block->escapeUrl($merchantUrl) ?>">Go to Merchant</a>
+

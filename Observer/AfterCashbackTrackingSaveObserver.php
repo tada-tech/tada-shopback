@@ -5,21 +5,14 @@ namespace Tada\Shopback\Observer;
 
 use Magento\Framework\Event\Observer;
 use Magento\Framework\Event\ObserverInterface;
+use Magento\Framework\MessageQueue\PublisherInterface;
 use Psr\Log\LoggerInterface;
-use Tada\CashbackTracking\Api\CashbackTrackingRepositoryInterface;
 use Tada\CashbackTracking\Api\Data\CashbackTrackingInterface;
-use Tada\Shopback\Api\ShopbackStackRepositoryInterface;
+use Tada\CashbackTracking\Api\Data\CashbackTrackingExtensionFactory;
 
 class AfterCashbackTrackingSaveObserver implements ObserverInterface
 {
-    /**
-     * @var ShopbackStackRepositoryInterface
-     */
-    protected $shopbackStackRepository;
-    /**
-     * @var CashbackTrackingRepositoryInterface
-     */
-    protected $cashbackRepository;
+    const TOPIC_NAME = 'shopback_stack.add';
 
     /**
      * @var LoggerInterfac
@@ -27,19 +20,23 @@ class AfterCashbackTrackingSaveObserver implements ObserverInterface
     protected $logger;
 
     /**
-     * AfterCashbackTrackingSaveObserver constructor.
-     * @param ShopbackStackRepositoryInterface $shopbackStackRepository
-     * @param CashbackTrackingRepositoryInterface $cashbackTrackingRepository
-     * @param LoggerInterface $logger
+     * @var PublisherInterface
      */
+    protected $publisher;
+
+    /**
+     * @var CashbackTrackingExtensionFactory
+     */
+    protected $cashbackExtensionFactory;
+
     public function __construct(
-        ShopbackStackRepositoryInterface $shopbackStackRepository,
-        CashbackTrackingRepositoryInterface $cashbackTrackingRepository,
-        LoggerInterface $logger
+        LoggerInterface $logger,
+        PublisherInterface $publisher,
+        CashbackTrackingExtensionFactory $cashbackExtensionFactory
     ) {
-        $this->shopbackStackRepository = $shopbackStackRepository;
-        $this->cashbackRepository = $cashbackTrackingRepository;
         $this->logger = $logger;
+        $this->publisher = $publisher;
+        $this->cashbackExtensionFactory = $cashbackExtensionFactory;
     }
 
     /**
@@ -49,10 +46,13 @@ class AfterCashbackTrackingSaveObserver implements ObserverInterface
     {
         /** @var CashbackTrackingInterface $cashbackTracking */
         $cashbackTracking = $observer->getData('data_object');
-        $orderId = (int)$cashbackTracking->getOrderId();
+
+        $extensionAttributes = $cashbackTracking->getExtensionAttributes() ?? $this->cashbackExtensionFactory->create();
+        $extensionAttributes->setAction('create');
+        $cashbackTracking->setExtensionAttributes($extensionAttributes);
 
         try {
-            $this->shopbackStackRepository->addToStackWithAction($orderId, 'create');
+            $this->publisher->publish(self::TOPIC_NAME, $cashbackTracking);
         } catch (\Exception $e) {
             $this->logger->error($e);
         }

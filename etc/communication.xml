@@ -1,0 +1,5 @@
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Communication/etc/communication.xsd">
+    <topic name="shopback_stack.add" request="Tada\CashbackTracking\Api\Data\CashbackTrackingInterface">
+        <handler name="shopback_stack.handler" type="Tada\Shopback\Model\Queue\Consumer" method="process" />
+    </topic>
+</config>

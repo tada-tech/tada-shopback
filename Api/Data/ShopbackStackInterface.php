@@ -10,14 +10,12 @@ interface ShopbackStackInterface extends ExtensibleDataInterface
 {
     const TBL_NAME = 'tada_shopback_stack';
     const ENTITY_ID = 'entity_id';
-    const ORDER_ID = 'order_id';
+    const ORDER_ITEM_ID = 'order_item_id';
     const ACTION = 'action';
     const STATUS = 'status';
     const CREATED_AT = 'created_at';
     const UPDATED_AT = 'updated_at';
-
     const ALLOW_STATUS = ['pending', 'done'];
-    const ALLOW_ACTION = ['create', 'validate'];
 
     /**
      * @return int
@@ -33,13 +31,13 @@ interface ShopbackStackInterface extends ExtensibleDataInterface
     /**
      * @return int
      */
-    public function getOrderId();
+    public function getOrderItemId();
 
     /**
-     * @param int $orderId
+     * @param int $orderItemId
      * @return $this
      */
-    public function setOrderId(int $orderId);
+    public function setOrderItemId(int $orderItemId);
 
     /**
      * @return string

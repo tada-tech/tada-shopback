@@ -17,20 +17,39 @@ class ShopbackStack extends AbstractDb
     }
 
     /**
-     * @param int $orderId
+     * @param int $orderItemId
      * @param string $action
      * @return int|false
      * @throws \Magento\Framework\Exception\LocalizedException
      */
-    public function isExisted(int $orderId, string $action)
+    public function isExisted(int $orderItemId, string $action)
     {
         $conn = $this->getConnection();
 
         $select = $conn->select()
             ->from($this->getMainTable(), ShopbackStackInterface::ENTITY_ID)
-            ->where('order_id = :order_id and action = :action and status = :status');
+            ->where('order_item_id = :order_item_id and action = :action and status = :status');
 
-        $bind = [':order_id' => $orderId, ':action' => $action, ':status' => 'pending'];
+        $bind = [':order_item_id' => $orderItemId, ':action' => $action, ':status' => 'pending'];
+
+        return $conn->fetchOne($select, $bind);
+    }
+
+    /**
+     * @param int $orderItemId
+     * @param string $action
+     * @return int|false
+     * @throws \Magento\Framework\Exception\LocalizedException
+     */
+    public function isStatusDone(int $orderItemId, string $action = 'create')
+    {
+        $conn = $this->getConnection();
+
+        $select = $conn->select()
+            ->from($this->getMainTable(), ShopbackStackInterface::ENTITY_ID)
+            ->where('order_item_id = :order_item_id and action = :action and status = :status');
+
+        $bind = [':order_item_id' => $orderItemId, ':action' => $action, ':status' => 'done'];
 
         return $conn->fetchOne($select, $bind);
     }

@@ -5,7 +5,8 @@ namespace Tada\Shopback\Model;
 
 use GuzzleHttp\Psr7\Response;
 use Magento\Sales\Api\Data\OrderInterface;
-use Magento\Sales\Api\OrderRepositoryInterface;
+use Magento\Sales\Api\Data\OrderItemInterface;
+use Magento\Sales\Api\OrderItemRepositoryInterface;
 use Tada\Shopback\Api\Data\ShopbackStackInterface;
 use Tada\Shopback\Api\ShopbackCreateOrderInterface;
 use Tada\Shopback\Api\ShopbackServiceInterface;
@@ -26,9 +27,9 @@ class UpdateStackProcessor implements UpdateStackProcessorInterface
     protected $shopbackStackRepository;
 
     /**
-     * @var OrderRepositoryInterface
+     * @var OrderItemRepositoryInterface
      */
-    protected $orderRepository;
+    protected $orderItemRepository;
 
     /**
      * @var ShopbackValidateOrderInterface
@@ -41,18 +42,17 @@ class UpdateStackProcessor implements UpdateStackProcessorInterface
     protected $createService;
 
     /**
-     * UpdateStackProcessor constructor.
      * @param ShopbackStackRepositoryInterface $shopbackStackRepository
-     * @param OrderRepositoryInterface $orderRepository
-     * @param ShopbackServiceInterface[] $servicePool
+     * @param OrderItemRepositoryInterface $orderItemRepository
+     * @param array $servicePool
      */
     public function __construct(
         ShopbackStackRepositoryInterface $shopbackStackRepository,
-        OrderRepositoryInterface $orderRepository,
-        array $servicePool
+        OrderItemRepositoryInterface     $orderItemRepository,
+        array                            $servicePool
     ) {
         $this->shopbackStackRepository = $shopbackStackRepository;
-        $this->orderRepository = $orderRepository;
+        $this->orderItemRepository = $orderItemRepository;
         $this->servicePool = $servicePool;
     }
 
@@ -63,12 +63,11 @@ class UpdateStackProcessor implements UpdateStackProcessorInterface
     {
         $pending = $this->shopbackStackRepository->getPendingItems();
 
-        /** @var ShopbackStackInterface $item */
-        foreach ($pending->getItems() as $item) {
-            $orderId = (int)$item->getOrderId();
+        $items = $pending->getItems();
 
-            /** @var OrderInterface $order */
-            $order = $this->orderRepository->get($orderId);
+        /** @var ShopbackStackInterface $item */
+        foreach ($items as $item) {
+
             $action = $item->getAction();
 
             if (!isset($this->servicePool[$action])) {
@@ -77,15 +76,20 @@ class UpdateStackProcessor implements UpdateStackProcessorInterface
                 );
             }
 
-            /** @var Response $response */
-            $response = $this->servicePool[$action]->execute($order);
-
-            $status = $response->getStatusCode();
-            $body = json_decode((string)$response->getBody(), true);
-
-            if ($status == 200 && $body['success'] == true) {
-                $item->done();
+            if ($this->servicePool[$action]->isSkip($item)) {
+                continue;
             }
+
+            $this->servicePool[$action]->beforeExecute($item);
+
+            $orderItemId = (int)$item->getOrderItemId();
+            /** @var OrderItemInterface $orderItem */
+            $orderItem = $this->orderItemRepository->get($orderItemId);
+
+            /** @var Response $response */
+            $response = $this->servicePool[$action]->execute($orderItem);
+
+            $this->servicePool[$action]->afterExecute($response, $item);
         }
     }
 }

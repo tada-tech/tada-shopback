@@ -81,15 +81,7 @@ class AfterCashbackTrackingSaveObserverTest extends TestCase
 
         $cashbackTrackingEntity = $this->cashbackTrackingRepository->save($cashbackTracking);
 
-        $pendingList = $this->shopbackStackRepository->getPendingItems();
-
-        $items = $pendingList->getItems();
-        /** @var ShopbackStackInterface $item */
-        $item = array_pop($items);
-        $this->assertEquals(1, $pendingList->getTotalCount());
-        $this->assertEquals('create', $item->getAction());
-        $this->assertEquals('pending', $item->getStatus());
-        $this->assertEquals($orderId, $item->getOrderId());
+        $this->assertNotEmpty($cashbackTracking->getExtensionAttributes()->getAction());
     }
 
     /**

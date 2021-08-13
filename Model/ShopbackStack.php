@@ -63,18 +63,18 @@ class ShopbackStack extends AbstractExtensibleModel implements ShopbackStackInte
     /**
      * @return int
      */
-    public function getOrderId()
+    public function getOrderItemId()
     {
-        return $this->getData(self::ORDER_ID);
+        return $this->getData(self::ORDER_ITEM_ID);
     }
 
     /**
-     * @param int $orderId
+     * @param int $orderItemId
      * @return $this
      */
-    public function setOrderId(int $orderId)
+    public function setOrderItemId(int $orderItemId)
     {
-        $this->setData(self::ORDER_ID, $orderId);
+        $this->setData(self::ORDER_ITEM_ID, $orderItemId);
         return $this;
     }
 

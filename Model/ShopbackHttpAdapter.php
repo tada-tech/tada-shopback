@@ -95,4 +95,19 @@ class ShopbackHttpAdapter
         $dateTime = new \DateTime($dateTime, $timeZone);
         return $dateTime->format($format);
     }
+
+    public function decode(string $body): array
+    {
+        $arr = explode(";", $body);
+        $result = [];
+
+        foreach ($arr as $item) {
+            if (!$item) {
+                continue;
+            }
+            list($key, $value) = explode("=", $item);
+            $result[$key] = $value;
+        }
+        return $result;
+    }
 }
