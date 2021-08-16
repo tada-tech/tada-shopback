@@ -19,6 +19,9 @@
     <preference for="Tada\Shopback\Api\UpdateStackProcessorInterface"
                 type="Tada\Shopback\Model\UpdateStackProcessor" />
 
+    <preference for="Tada\Shopback\Api\AddStackProcessorInterface"
+                type="Tada\Shopback\Model\AddStackProcessor" />
+
     <type name="Tada\Shopback\Model\UpdateStackProcessor">
         <arguments>
             <argument name="servicePool" xsi:type="array">
@@ -27,13 +30,6 @@
             </argument>
         </arguments>
     </type>
-
-
-    <preference for="Tada\Shopback\Api\FakeShopbackRepositoryInterface"
-                type="Tada\Shopback\Model\FakeShopbackRepository" />
-
-    <preference for="Tada\Shopback\Api\Data\FakeShopbackResponseInterface"
-                type="Tada\Shopback\Model\Data\FakeShopbackResponse" />
 
     <type name="Magento\Sales\Model\ResourceModel\Order">
         <plugin name="validateShopbackOrder"
