@@ -46,7 +46,8 @@ define([
         }
 
         if (referrer.includes(shopbackUrl)) {
-            if (prevReferrer != REF_VALUE.affiliate) {
+            var hasParameter = $.mage.cookies.get(COOKIE_NAME);
+            if (prevReferrer != REF_VALUE.affiliate && hasParameter !== null) {
                 $.mage.cookies.set(REF_FLAG, REF_VALUE.affiliate, options);
             }
         }
@@ -54,6 +55,7 @@ define([
             var noIncludeBaseUrl = !referrer.includes(window.BASE_URL);
             if (prevReferrer != REF_VALUE.refer && noIncludeBaseUrl) {
                 $.mage.cookies.set(REF_FLAG, REF_VALUE.refer, options);
+                $.mage.cookies.clear(COOKIE_NAME);
             }
         }
     };
