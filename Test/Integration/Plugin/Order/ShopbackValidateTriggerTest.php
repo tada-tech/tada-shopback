@@ -10,7 +10,6 @@ use Magento\Quote\Model\Quote;
 use Magento\Quote\Model\Quote\Address\Rate;
 use Magento\Sales\Api\OrderRepositoryInterface;
 use Magento\Sales\Model\Order;
-use Magento\Setup\Model\ThemeDependencyCheckerFactory;
 use Magento\TestFramework\Helper\Bootstrap;
 use PHPUnit\Framework\TestCase;
 use Magento\Sales\Api\Data\OrderInterface;
@@ -47,6 +46,7 @@ class ShopbackValidateTriggerTest extends TestCase
     }
 
     /**
+     * @magentoConfigFixture default/shopback/general/shopback_order_validation_flow_enabled 1
      * @magentoAppIsolation enabled
      * @magentoDbIsolation enabled
      * @magentoDataFixture Magento/Sales/_files/quote.php
@@ -65,12 +65,13 @@ class ShopbackValidateTriggerTest extends TestCase
 
         $this->assertEquals(Order::STATE_CANCELED, $order->getState());
 
-        $cashbackEntity = $order->getExtensionAttributes()->getPartnerTracking();
+        $pendingList = $this->shopbackStackRepository->getPendingItems();
 
-        $this->assertNotEmpty($cashbackEntity->getExtensionAttributes()->getAction());
+        $this->assertEquals(2, $pendingList->getTotalCount());
     }
 
     /**
+     * @magentoConfigFixture default/shopback/general/shopback_order_validation_flow_enabled 1
      * @magentoAppIsolation enabled
      * @magentoDbIsolation enabled
      * @magentoDataFixture Magento/Sales/_files/quote.php
@@ -88,7 +89,9 @@ class ShopbackValidateTriggerTest extends TestCase
         $order = $this->orderRepository->save($order);
         $this->assertEquals(Order::STATE_COMPLETE, $order->getState());
 
-        $this->assertEmpty($order->getExtensionAttributes()->getPartnerTracking());
+        $pendingList = $this->shopbackStackRepository->getPendingItems();
+
+        $this->assertEquals(0, $pendingList->getTotalCount());
     }
 
     /**

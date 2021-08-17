@@ -22,6 +22,7 @@ class Data extends AbstractHelper
     const SHOPBACK_GENERAL_SHOPBACK_VALIDATE_OFFER_ID = 'shopback/general/shopback_validate_offer_id';
     const SHOPBACK_GENERAL_SHOPBACK_VALIDATE_AFFILIATE_ID = 'shopback/general/shopback_validate_affiliate_id';
     const SHOPBACK_GENERAL_SHOPBACK_SECURITY_TOKEN = 'shopback/general/shopback_security_token';
+    const SHOPBACK_GENERAL_SHOPBACK_ORDER_VALIDATION_FLOW_ENABLED = 'shopback/general/shopback_order_validation_flow_enabled';
     const SHOPBACK_GENERAL_SHOPBACK_TESTING_ENABLED = 'shopback/general/testing_enabled';
 
     /**
@@ -184,5 +185,13 @@ class Data extends AbstractHelper
     public function getTestingEnabled()
     {
         return (bool)$this->scopeConfig->getValue(self::SHOPBACK_GENERAL_SHOPBACK_TESTING_ENABLED);
+    }
+
+    /**
+     * @return bool
+     */
+    public function isOrderValidationFlowEnabled()
+    {
+        return (bool)$this->scopeConfig->getValue(self::SHOPBACK_GENERAL_SHOPBACK_ORDER_VALIDATION_FLOW_ENABLED);
     }
 }

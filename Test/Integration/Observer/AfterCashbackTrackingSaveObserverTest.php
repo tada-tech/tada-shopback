@@ -14,7 +14,6 @@ use PHPUnit\Framework\TestCase;
 use Magento\TestFramework\Helper\Bootstrap;
 use Tada\CashbackTracking\Api\CashbackTrackingRepositoryInterface;
 use Tada\CashbackTracking\Model\CashbackTrackingFactory;
-use Tada\Shopback\Api\Data\ShopbackStackInterface;
 use Tada\Shopback\Api\ShopbackStackRepositoryInterface;
 
 class AfterCashbackTrackingSaveObserverTest extends TestCase
@@ -81,7 +80,9 @@ class AfterCashbackTrackingSaveObserverTest extends TestCase
 
         $cashbackTrackingEntity = $this->cashbackTrackingRepository->save($cashbackTracking);
 
-        $this->assertNotEmpty($cashbackTracking->getExtensionAttributes()->getAction());
+        $pendingList = $this->shopbackStackRepository->getPendingItems();
+
+        $this->assertEquals(1, $pendingList->getTotalCount());
     }
 
     /**

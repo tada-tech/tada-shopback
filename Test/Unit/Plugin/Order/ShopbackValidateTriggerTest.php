@@ -54,6 +54,11 @@ class ShopbackValidateTriggerTest extends TestCase
 
     public function testAfterSaveAndTriggerEvent()
     {
+
+        $this->configData
+            ->shouldReceive('isOrderValidationFlowEnabled')
+            ->andReturn(true);
+
         /**
          * @var Mockery\MockInterface $subject
          * @var Mockery\MockInterface $result
@@ -101,6 +106,10 @@ class ShopbackValidateTriggerTest extends TestCase
 
     public function testAfterSaveButNotTriggerEvent()
     {
+        $this->configData
+            ->shouldReceive('isOrderValidationFlowEnabled')
+            ->andReturn(true);
+
         /**
          * @var Mockery\MockInterface $subject
          * @var Mockery\MockInterface $result
@@ -129,8 +138,28 @@ class ShopbackValidateTriggerTest extends TestCase
         $this->assertSame($result, $this->shopbackValidateTrigger->afterSave($subject, $result, $orderModel));
     }
 
+    public function testAfterSaveButNotTriggerEventByDisableFlow()
+    {
+        $this->configData
+            ->shouldReceive('isOrderValidationFlowEnabled')
+            ->andReturn(false);
+
+        /**
+         * @var Mockery\MockInterface $subject
+         * @var Mockery\MockInterface $result
+         * @var Mockery\MockInterface $orderModel
+         * @var Mockery\MockInterface $order
+         */
+        list($subject, $result, $orderModel, $order) = $this->_getMockObject();
+
+        $this->assertSame($result, $this->shopbackValidateTrigger->afterSave($subject, $result, $orderModel));
+    }
+
     public function testAfterSaveWithException()
     {
+        $this->configData
+            ->shouldReceive('isOrderValidationFlowEnabled')
+            ->andReturn(true);
         /**
          * @var Mockery\MockInterface $subject
          * @var Mockery\MockInterface $result

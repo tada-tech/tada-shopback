@@ -62,7 +62,13 @@
                     <frontend_model>Tada\Shopback\Block\Adminhtml\Form\Field\StatusMapping</frontend_model>
                     <backend_model>Magento\Config\Model\Config\Backend\Serialized\ArraySerialized</backend_model>
                 </field>
-                <field id="testing_enabled" translate="label comment" type="select" sortOrder="100" showInDefault="1"
+                <field id="shopback_order_validation_flow_enabled" translate="label comment" type="select" sortOrder="100" showInDefault="1"
+                       showInWebsite="0" showInStore="0">
+                    <label>Enable Order Validation Flow</label>
+                    <comment>Enable this config, the order validation flow will be implemented</comment>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="testing_enabled" translate="label comment" type="select" sortOrder="110" showInDefault="1"
                        showInWebsite="0" showInStore="0">
                     <label>Enable To Simulate Redirect Flow</label>
                     <comment>Access url : http://your_domain/tada_shopback/simulator</comment>

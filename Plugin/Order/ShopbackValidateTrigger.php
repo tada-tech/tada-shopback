@@ -47,6 +47,10 @@ class ShopbackValidateTrigger
         ResourceOrder $result,
         \Magento\Framework\Model\AbstractModel $orderModel
     ) {
+        if (!$this->configData->isOrderValidationFlowEnabled()) {
+            return $result;
+        }
+
         try {
             $order = $this->orderRepository->get((int)$orderModel->getEntityId());
         } catch (\Exception $e) {

@@ -5,7 +5,6 @@ namespace Tada\Shopback\Test\Unit;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\ClientFactory;
-use GuzzleHttp\Exception\ServerException;
 use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\Psr7\ResponseFactory;
 use PHPUnit\Framework\TestCase;

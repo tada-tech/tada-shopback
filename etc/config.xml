@@ -19,6 +19,7 @@
                     }
                     }
                 </shopback_status_mapping>
+                <shopback_order_validation_flow_enabled>0</shopback_order_validation_flow_enabled>
                 <testing_enabled>0</testing_enabled>
             </general>
         </shopback>

@@ -34,6 +34,12 @@ class ShopbackValidateOrderObserver implements ObserverInterface
      */
     protected $addStackProcessor;
 
+    /**
+     * @param LoggerInterface $logger
+     * @param CashbackTrackingExtensionFactory $cashbackTrackingExtensionFactory
+     * @param OrderRepositoryInterface $orderRepository
+     * @param AddStackProcessorInterface $addStackProcessor
+     */
     public function __construct(
         LoggerInterface $logger,
         CashbackTrackingExtensionFactory $cashbackTrackingExtensionFactory,

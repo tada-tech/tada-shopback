@@ -3,18 +3,16 @@ declare(strict_types=1);
 
 namespace Tada\Shopback\Test\Unit\Observer;
 
+use Magento\Sales\Api\Data\OrderInterface;
+use Magento\Sales\Api\OrderRepositoryInterface;
 use PHPUnit\Framework\TestCase;
 use Mockery;
 use Magento\Framework\Event\Observer;
-use Magento\Framework\MessageQueue\PublisherInterface;
 use Psr\Log\LoggerInterface;
-use Tada\CashbackTracking\Api\CashbackTrackingRepositoryInterface;
 use Tada\CashbackTracking\Api\Data\CashbackTrackingExtensionFactory;
 use Tada\CashbackTracking\Model\CashbackTracking;
-use Tada\Shopback\Api\Data\ShopbackStackInterface;
-use Tada\Shopback\Api\ShopbackStackRepositoryInterface;
+use Tada\Shopback\Api\AddStackProcessorInterface;
 use Tada\Shopback\Observer\AfterCashbackTrackingSaveObserver;
-use Tada\CashbackTracking\Api\Data\CashbackTrackingExtensionInterface;
 
 class AfterCashbackTrackingSaveObserverTest extends TestCase
 {
@@ -28,20 +26,32 @@ class AfterCashbackTrackingSaveObserverTest extends TestCase
      */
     protected $afterCashbackTrackingSaveObserver;
 
-    protected $publisher;
-
+    /**
+     * @var Mockery\MockInterface
+     */
     protected $cashbackExtensionFactory;
+
+    /**
+     * @var Mockery\MockInterface
+     */
+    protected $orderRepository;
+
+    /**
+     * @var Mockery\MockInterface
+     */
+    protected $addStackProcessor;
 
     protected function setUp()
     {
         $this->logger = Mockery::mock(LoggerInterface::class);
-        $this->publisher = Mockery::mock(PublisherInterface::class);
+        $this->orderRepository = Mockery::mock(OrderRepositoryInterface::class);
         $this->cashbackExtensionFactory = Mockery::mock(CashbackTrackingExtensionFactory::class);
-
+        $this->addStackProcessor = Mockery::mock(AddStackProcessorInterface::class);
         $this->afterCashbackTrackingSaveObserver = new AfterCashbackTrackingSaveObserver(
             $this->logger,
-            $this->publisher,
-            $this->cashbackExtensionFactory
+            $this->orderRepository,
+            $this->cashbackExtensionFactory,
+            $this->addStackProcessor
         );
     }
 
@@ -58,29 +68,20 @@ class AfterCashbackTrackingSaveObserverTest extends TestCase
             ->with('data_object')
             ->andReturn($cashbackEntity);
 
-        $cashbackEntity->shouldReceive('getExtensionAttributes')
-            ->andReturnNull();
+        $orderId = 1;
+        $cashbackEntity->shouldReceive('getOrderId')
+            ->andReturn($orderId);
 
-        $extensionAttributes = Mockery::mock(\Tada\CashbackTracking\Api\Data\CashbackTrackingExtension::class);
-        $this->cashbackExtensionFactory
-            ->shouldReceive('create')
-            ->andReturn($extensionAttributes);
+        $order = Mockery::mock(OrderInterface::class);
 
-        $action = 'create';
+        $this->orderRepository
+            ->shouldReceive('get')
+            ->with($orderId)
+            ->andReturn($order);
 
-        $extensionAttributes->shouldReceive('setAction')
-            ->with($action)
-            ->andReturnSelf();
-
-        $cashbackEntity->shouldReceive('setExtensionAttributes')
-            ->with($extensionAttributes)
-            ->andReturnSelf();
-
-        $topic = AfterCashbackTrackingSaveObserver::TOPIC_NAME;
-
-        $this->publisher
-            ->shouldReceive('publish')
-            ->with($topic, $cashbackEntity);
+        $this->addStackProcessor
+            ->shouldReceive('execute')
+            ->with($order, 'create');
 
         $this->assertNull($this->afterCashbackTrackingSaveObserver->execute($observer));
     }
@@ -94,30 +95,22 @@ class AfterCashbackTrackingSaveObserverTest extends TestCase
             ->with('data_object')
             ->andReturn($cashbackEntity);
 
-        $cashbackEntity->shouldReceive('getExtensionAttributes')
-            ->andReturnNull();
+        $orderId = 1;
+        $cashbackEntity->shouldReceive('getOrderId')
+            ->andReturn($orderId);
 
-        $extensionAttributes = Mockery::mock(\Tada\CashbackTracking\Api\Data\CashbackTrackingExtension::class);
-        $this->cashbackExtensionFactory
-            ->shouldReceive('create')
-            ->andReturn($extensionAttributes);
+        $order = Mockery::mock(OrderInterface::class);
 
-        $action = 'create';
-
-        $extensionAttributes->shouldReceive('setAction')
-            ->with($action)
-            ->andReturnSelf();
-
-        $cashbackEntity->shouldReceive('setExtensionAttributes')
-            ->with($extensionAttributes)
-            ->andReturnSelf();
+        $this->orderRepository
+            ->shouldReceive('get')
+            ->with($orderId)
+            ->andReturn($order);
 
         $exception = Mockery::mock(\Exception::class);
 
-        $topic = AfterCashbackTrackingSaveObserver::TOPIC_NAME;
-        $this->publisher
-            ->shouldReceive('publish')
-            ->with($topic, $cashbackEntity)
+        $this->addStackProcessor
+            ->shouldReceive('execute')
+            ->with($order, 'create')
             ->andThrow($exception);
 
         $this->logger
